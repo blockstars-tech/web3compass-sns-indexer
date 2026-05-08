@@ -1,11 +1,11 @@
 /* eslint-disable unicorn/no-null -- TypeORM-idiomatic clear sentinel for nullable columns */
-import { Inject, Injectable } from "@nestjs/common";
-import { InjectPinoLogger, type PinoLogger } from "nestjs-pino";
-import { DataSource, type EntityManager } from "typeorm";
+import { Inject, Injectable } from '@nestjs/common';
+import { InjectPinoLogger, type PinoLogger } from 'nestjs-pino';
+import { DataSource, type EntityManager } from 'typeorm';
 
-import { DnsEntity } from "../dns.entity";
-import { CidProcessingEntity } from "./cid-processing.entity";
-import { CidProcessingRepository } from "./cid-processing.repository";
+import { DnsEntity } from '../dns.entity';
+import { CidProcessingEntity } from './cid-processing.entity';
+import { CidProcessingRepository } from './cid-processing.repository';
 
 /**
  * Mirrors the upstream EVM `handleCidChange` flow: when a domain's CID
@@ -50,6 +50,7 @@ export class CidProcessingService {
         this.logger.error(
           `Failed to handle CID change for dns ${dns.id}: ${(error as Error).message}`,
         );
+
         throw error;
       }
     }
@@ -73,8 +74,8 @@ export class CidProcessingService {
       // tear the row down if the group is now empty.
       if (cidProcessing.associatedDomains.length > 0) {
         const survivors = await manager
-          .createQueryBuilder(DnsEntity, "dns")
-          .where("dns.name IN (:...domains)", {
+          .createQueryBuilder(DnsEntity, 'dns')
+          .where('dns.name IN (:...domains)', {
             domains: cidProcessing.associatedDomains,
           })
           .getMany();
@@ -83,6 +84,8 @@ export class CidProcessingService {
           survivor.cidProcessingId = null;
           survivor.isPrimary = false;
           survivor.ipfsProcessed = false;
+          // Sequential save inside a transaction — concurrency would race the EM.
+          // eslint-disable-next-line no-await-in-loop
           await manager.save(survivor);
         }
       }

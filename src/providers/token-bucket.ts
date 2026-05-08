@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null -- canonical sentinel for "no pending timer". */
 /**
  * Async token-bucket rate limiter. Every RPC call acquires one token
  * before going on the wire; the bucket refills at `refillPerSec` tokens
@@ -10,8 +11,11 @@
  */
 export class TokenBucket {
   private tokens: number;
+
   private lastRefillAt: number;
+
   private readonly waiting: Array<() => void> = [];
+
   private timerHandle: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
@@ -87,7 +91,7 @@ export class TokenBucket {
 
     while (this.waiting.length > 0 && this.tokens >= 1) {
       this.tokens -= 1;
-      this.waiting.shift()!();
+      this.waiting.shift()();
     }
 
     if (this.waiting.length > 0) {

@@ -1,29 +1,29 @@
-import { Repository } from "typeorm";
+import { Repository } from 'typeorm';
 
-import { ChainEnum } from "../../constants/chain.enum";
-import { MigrationTypeEnum } from "../../constants/migration-type.enum";
-import { CustomRepository } from "../../db/typeorm-ex.decorator";
-import { DnsMigrationEntity } from "./dns-migration.entity";
+import { ChainEnum } from '../../constants/chain.enum';
+import { MigrationTypeEnum } from '../../constants/migration-type.enum';
+import { CustomRepository } from '../../db/typeorm-ex.decorator';
+import { DnsMigrationEntity } from './dns-migration.entity';
 
 @CustomRepository(DnsMigrationEntity)
 export class DnsMigrationRepository extends Repository<DnsMigrationEntity> {
   async findSnsRegisterMigration(): Promise<DnsMigrationEntity | null> {
-    return this.createQueryBuilder("info")
-      .where("info.type = :type", { type: MigrationTypeEnum.SNS_REGISTER })
+    return this.createQueryBuilder('info')
+      .where('info.type = :type', { type: MigrationTypeEnum.SNS_REGISTER })
       .getOne();
   }
 
   async findSnsRecordsV2UpdateMigration(): Promise<DnsMigrationEntity | null> {
-    return this.createQueryBuilder("info")
-      .where("info.type = :type", {
+    return this.createQueryBuilder('info')
+      .where('info.type = :type', {
         type: MigrationTypeEnum.SNS_RECORDS_V2_UPDATE,
       })
       .getOne();
   }
 
   async findSnsBackfillMigration(): Promise<DnsMigrationEntity | null> {
-    return this.createQueryBuilder("info")
-      .where("info.type = :type", { type: MigrationTypeEnum.SNS_BACKFILL })
+    return this.createQueryBuilder('info')
+      .where('info.type = :type', { type: MigrationTypeEnum.SNS_BACKFILL })
       .getOne();
   }
 

@@ -1,8 +1,8 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
-import type { UrlEntity } from "../../../dns/url.entity";
-import { AbstractDto } from "../../dtoes/abstract.dto";
-import type { DnsDto } from "./dns.dto";
+import type { UrlEntity } from '../../../dns/url.entity';
+import { AbstractDto } from '../../dtoes/abstract.dto';
+import { DnsDto } from './dns.dto';
 
 export class UrlDto extends AbstractDto {
   @ApiProperty()

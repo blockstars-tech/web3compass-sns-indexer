@@ -1,10 +1,10 @@
-import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
-import { AbstractEntity } from "../common/entities/abstract.entity";
-import { DnsSettingsDto } from "../common/modules/dns/dns-settings.dto";
-import { DnsEntity } from "./dns.entity";
+import { AbstractEntity } from '../common/entities/abstract.entity';
+import { DnsSettingsDto } from '../common/modules/dns/dns-settings.dto';
+import { DnsEntity } from './dns.entity';
 
-@Entity("dns_settings")
+@Entity('dns_settings')
 export class DnsSettingsEntity extends AbstractEntity<DnsSettingsDto> {
   @Column({ nullable: false })
   txHash: string;
@@ -22,10 +22,10 @@ export class DnsSettingsEntity extends AbstractEntity<DnsSettingsDto> {
   ipfsUrl?: string;
 
   @ManyToOne(() => DnsEntity, (dnsEntity) => dnsEntity.settings, {
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: "dns_id" })
+  @JoinColumn({ name: 'dns_id' })
   dns: DnsEntity;
 
   dtoClass = DnsSettingsDto;

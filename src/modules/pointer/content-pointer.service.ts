@@ -1,13 +1,13 @@
 /* eslint-disable unicorn/no-null -- `null` is the TypeORM-idiomatic clear sentinel for nullable columns */
-import { Inject, Injectable } from "@nestjs/common";
-import { InjectPinoLogger, type PinoLogger } from "nestjs-pino";
+import { Inject, Injectable } from '@nestjs/common';
+import { InjectPinoLogger, type PinoLogger } from 'nestjs-pino';
 
 import {
   type ContentPointerEntity,
   PointerKind,
   PointerState,
-} from "./content-pointer.entity";
-import { ContentPointerRepository } from "./content-pointer.repository";
+} from './content-pointer.entity';
+import { ContentPointerRepository } from './content-pointer.repository';
 
 /**
  * Maps an ENS contenthash codec string to our PointerKind enum.
@@ -26,15 +26,15 @@ export function pointerKindFromContentType(
 
   const t = contentType.toLowerCase();
 
-  if (t.includes("ipns")) {
+  if (t.includes('ipns')) {
     return PointerKind.IPNS;
   }
 
-  if (t.includes("swarm")) {
+  if (t.includes('swarm')) {
     return PointerKind.SWARM_FEED;
   }
 
-  if (t.includes("dnslink")) {
+  if (t.includes('dnslink')) {
     return PointerKind.DNSLINK;
   }
 
@@ -142,8 +142,8 @@ export class ContentPointerService {
 
     this.logger.info(
       `syncFromDns dns=${args.dnsId} contentType=${
-        args.contentType ?? "null"
-      } cid=${args.cid ?? "null"} -> kind=${kind ?? "none"}`,
+        args.contentType ?? 'null'
+      } cid=${args.cid ?? 'null'} -> kind=${kind ?? 'none'}`,
     );
 
     if (!kind || !args.cid) {

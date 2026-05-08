@@ -92,7 +92,7 @@ export async function applyResolution(
       row.isFetchFailed = false;
       row.ipfsFetchStatus = StatusCodes.SUCCESS;
       row.ipfsProcessed = false;
-  
+
       const saved = await effects.saveRow(row);
 
       await effects.createDnsSettings(saved);
@@ -118,7 +118,7 @@ export async function applyResolution(
 
   // MISS
   const newAttempt = (row.ipfsFetchAttempt ?? 0) + 1;
-  const exhausted = newAttempt >= MAX_IPFS_FETCH_RETRY_ATTEMPTS;
+  const isExhausted = newAttempt >= MAX_IPFS_FETCH_RETRY_ATTEMPTS;
 
   if (oldCid) {
     // Domain previously had content that's no longer resolvable. Mirror
@@ -130,7 +130,7 @@ export async function applyResolution(
     row.contentType = null;
     row.ipfsFetchStatus = StatusCodes.FAILED;
     row.ipfsFetchAttempt = newAttempt;
-    row.isFetchFailed = exhausted;
+    row.isFetchFailed = isExhausted;
     row.ipfsProcessed = true;
 
     const saved = await effects.saveRow(row);
@@ -151,7 +151,7 @@ export async function applyResolution(
   row.contentType = null;
   row.ipfsFetchStatus = StatusCodes.FAILED;
   row.ipfsFetchAttempt = newAttempt;
-  row.isFetchFailed = exhausted;
+  row.isFetchFailed = isExhausted;
   row.ipfsProcessed = true;
 
   await effects.saveRow(row);

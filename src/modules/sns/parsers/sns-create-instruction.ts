@@ -1,7 +1,7 @@
-import {
-  type ParsedInnerInstruction,
-  type ParsedInstruction,
-  type PartiallyDecodedInstruction,
+import type {
+  ParsedInnerInstruction,
+  ParsedInstruction,
+  PartiallyDecodedInstruction,
   PublicKey,
 } from '@solana/web3.js';
 import bs58 from 'bs58';

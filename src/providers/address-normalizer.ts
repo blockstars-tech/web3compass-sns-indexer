@@ -1,4 +1,4 @@
-import { ChainEnum } from "../constants/chain.enum";
+import { ChainEnum } from '../constants/chain.enum';
 
 /**
  * Solana base58 pubkeys are case-sensitive — never lowercase them. EVM
@@ -12,6 +12,9 @@ export function normalizeOwnerAddress(
     return addr;
   }
 
+  // `chain` is intentionally `ChainEnum | string | undefined` — callers
+  // sometimes pass the raw DB value before mapping it to the enum.
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
   if (chain === ChainEnum.SOLANA) {
     return addr;
   }

@@ -1,8 +1,8 @@
-import { type DynamicModule, type Provider, type Type } from "@nestjs/common";
-import { getDataSourceToken } from "@nestjs/typeorm";
-import type { DataSource } from "typeorm";
+import { type DynamicModule, type Provider, type Type } from '@nestjs/common';
+import { getDataSourceToken } from '@nestjs/typeorm';
+import type { DataSource } from 'typeorm';
 
-import { TYPEORM_EX_CUSTOM_REPOSITORY } from "./typeorm-ex.decorator";
+import { TYPEORM_EX_CUSTOM_REPOSITORY } from './typeorm-ex.decorator';
 
 export class TypeOrmExModule {
   public static forCustomRepository<T extends Type<unknown>>(

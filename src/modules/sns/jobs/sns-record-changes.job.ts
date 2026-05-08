@@ -159,10 +159,7 @@ export class SnsRecordChangesJob {
         );
       }
     } catch (error) {
-      this.logger.error(
-        { err: error },
-        'SNS record-changes: tick failed',
-      );
+      this.logger.error({ err: error }, 'SNS record-changes: tick failed');
     } finally {
       this.isJobRunning = false;
     }
@@ -193,9 +190,10 @@ export class SnsRecordChangesJob {
     let processed = 0;
 
     for (const domain of domains) {
-      const ok = await this.applyRecordWrite(domain, sig.signature);
+      // eslint-disable-next-line no-await-in-loop
+      const didWrite = await this.applyRecordWrite(domain, sig.signature);
 
-      if (ok) {
+      if (didWrite) {
         processed += 1;
       }
     }
@@ -264,14 +262,14 @@ export class SnsRecordChangesJob {
 
       // Backfill any fields the conflicting row lacked (its node may be
       // null if the register job created it via a different code path).
-      let dirty = false;
+      let isDirty = false;
 
       if (!row.node) {
         row.node = node;
-        dirty = true;
+        isDirty = true;
       }
 
-      if (dirty) {
+      if (isDirty) {
         row = await this.dnsRepository.save(row);
       }
     }

@@ -90,6 +90,9 @@ export class SnsReconcileJob {
 
       this.logger.info(`SNS reconcile: draining ${rows.length} row(s)`);
 
+      // Source keys match the public `ResolutionSource` shape — kebab-case
+      // to mirror SNS record-kind nomenclature.
+      /* eslint-disable @typescript-eslint/naming-convention, quote-props */
       const stats: Record<SourceKey, number> = {
         'v2-ipfs': 0,
         'v1-ipfs': 0,
@@ -97,6 +100,7 @@ export class SnsReconcileJob {
         'v1-arwv': 0,
         none: 0,
       };
+      /* eslint-enable @typescript-eslint/naming-convention, quote-props */
 
       const { errors } = await PromisePool.withConcurrency(
         this.configService.snsResolveConcurrency,

@@ -1,3 +1,4 @@
+import { Record as SnsRecordsAccount } from '@bonfida/sns-records';
 import {
   deserializeRecordV2Content,
   deserializeReverse,
@@ -12,7 +13,6 @@ import {
   SELF_SIGNED,
   Validation,
 } from '@bonfida/spl-name-service';
-import { Record as SnsRecordsAccount } from '@bonfida/sns-records';
 import { Inject, Injectable } from '@nestjs/common';
 import { PublicKey } from '@solana/web3.js';
 import { InjectPinoLogger, type PinoLogger } from 'nestjs-pino';
@@ -164,13 +164,13 @@ export class SnsService {
       // Both reads are pure `getAccountInfo` calls under the hood —
       // safe on every Solana RPC provider. Run them in parallel like
       // the SDK does.
-      const [domainInfo, recordInfo] = await UtilsProvider.retryWithExponentialBackoff(
-        () =>
+      const [domainInfo, recordInfo] =
+        await UtilsProvider.retryWithExponentialBackoff(() =>
           this.solanaService.connection.getMultipleAccountsInfo([
             domainKey,
             recordKey,
           ]),
-      );
+        );
 
       if (!domainInfo) {
         // The domain itself doesn't exist on-chain. Caller will handle.
@@ -191,8 +191,11 @@ export class SnsService {
       const owner = registry.owner;
       const stalenessId = retrievedRecord.getStalenessId();
 
-      const stalenessOk =
+      const isStalenessValid =
         owner.equals(new PublicKey(stalenessId)) &&
+        // Header validation field comes from the Bonfida SDK's nested enum;
+        // strict cross-enum-type checking can't see they unify here.
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
         retrievedRecord.header.stalenessValidation === Validation.Solana;
 
       const validation = ETH_ROA_RECORDS.has(record)
@@ -204,14 +207,15 @@ export class SnsService {
         : GUARDIANS.get(record)?.toBuffer();
 
       const roaId = retrievedRecord.getRoAId();
-      const roaOk =
+      const isRoaValid =
         expectedRoaContent === undefined ||
         (expectedRoaContent.compare(roaId) === 0 &&
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
           retrievedRecord.header.rightOfAssociationValidation === validation);
 
-      if (!stalenessOk || !roaOk) {
+      if (!isStalenessValid || !isRoaValid) {
         this.logger.debug(
-          `V2 ${record} for ${name}: staleness=${stalenessOk} roa=${roaOk} — treating as missing`,
+          `V2 ${record} for ${name}: staleness=${isStalenessValid} roa=${isRoaValid} — treating as missing`,
         );
 
         return undefined;

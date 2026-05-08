@@ -1,5 +1,5 @@
-import type { CidProcessingEntity } from "../../../dns/cid-processing/cid-processing.entity";
-import { AbstractDto } from "../../dtoes/abstract.dto";
+import type { CidProcessingEntity } from '../../../dns/cid-processing/cid-processing.entity';
+import { AbstractDto } from '../../dtoes/abstract.dto';
 
 export class CidProcessingDto extends AbstractDto {
   cid: string;

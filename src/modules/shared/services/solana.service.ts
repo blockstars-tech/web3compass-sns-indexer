@@ -25,6 +25,8 @@ export class SolanaService {
     const throttledFetch: typeof fetch = async (input, init) => {
       await throttle.acquire();
 
+      // Pass-through to the global fetch — types match by typeof fetch.
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       return globalThis.fetch(input, init);
     };
 

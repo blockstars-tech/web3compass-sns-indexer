@@ -5,16 +5,16 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-} from "typeorm";
+} from 'typeorm';
 
-import { ChainEnum } from "../../constants/chain.enum";
-import { AbstractEntity } from "../common/entities/abstract.entity";
-import { DnsDto } from "../common/modules/dns/dns.dto";
-import { DnsSettingsEntity } from "./dns-settings.entity";
-import { EnsResolverEntity } from "./ens-resolver.entity";
-import { UrlEntity } from "./url.entity";
+import { ChainEnum } from '../../constants/chain.enum';
+import { AbstractEntity } from '../common/entities/abstract.entity';
+import { DnsDto } from '../common/modules/dns/dns.dto';
+import { DnsSettingsEntity } from './dns-settings.entity';
+import { EnsResolverEntity } from './ens-resolver.entity';
+import { UrlEntity } from './url.entity';
 
-@Entity({ name: "dns" })
+@Entity({ name: 'dns' })
 export class DnsEntity extends AbstractEntity<DnsDto> {
   @Column()
   @Index({ unique: true })
@@ -38,7 +38,7 @@ export class DnsEntity extends AbstractEntity<DnsDto> {
 
   @Column({
     nullable: true,
-    comment: "To track the status of IPFS fetch 1 = failed, 0 = success",
+    comment: 'To track the status of IPFS fetch 1 = failed, 0 = success',
   })
   @Index()
   ipfsFetchStatus?: number;
@@ -75,7 +75,7 @@ export class DnsEntity extends AbstractEntity<DnsDto> {
   @Column({ nullable: true })
   ensResolverId?: string;
 
-  @Column({ type: "enum", enum: ChainEnum, default: ChainEnum.ETH })
+  @Column({ type: 'enum', enum: ChainEnum, default: ChainEnum.ETH })
   chain: ChainEnum;
 
   @OneToMany(() => UrlEntity, (urlEntity) => urlEntity.dns)
@@ -86,11 +86,11 @@ export class DnsEntity extends AbstractEntity<DnsDto> {
     (ensResolverEntity) => ensResolverEntity.dnses,
     {
       nullable: true,
-      onDelete: "SET NULL",
-      onUpdate: "CASCADE",
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
     },
   )
-  @JoinColumn({ name: "ens_resolver_id" })
+  @JoinColumn({ name: 'ens_resolver_id' })
   ensResolver?: EnsResolverEntity;
 
   @OneToMany(
@@ -99,13 +99,13 @@ export class DnsEntity extends AbstractEntity<DnsDto> {
   )
   settings: DnsSettingsEntity[];
 
-  @Column({ default: 0, comment: "To track the number of retry attempts" })
+  @Column({ default: 0, comment: 'To track the number of retry attempts' })
   @Index()
   attempt: number;
 
   @Column({
     nullable: true,
-    comment: "To track if IPFS processing has been attempted",
+    comment: 'To track if IPFS processing has been attempted',
   })
   @Index()
   ipfsProcessed: boolean;
@@ -117,7 +117,7 @@ export class DnsEntity extends AbstractEntity<DnsDto> {
 
   @Column({
     default: false,
-    comment: "To track if it should be re-indexed",
+    comment: 'To track if it should be re-indexed',
   })
   @Index()
   needsReindex: boolean;

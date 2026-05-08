@@ -1,10 +1,10 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { InjectPinoLogger, type PinoLogger } from "nestjs-pino";
+import { Inject, Injectable } from '@nestjs/common';
+import { InjectPinoLogger, type PinoLogger } from 'nestjs-pino';
 
-import { ApiConfigService } from "../shared/services/api-config.service";
-import { DnsEntity } from "./dns.entity";
-import { DnsSettingsEntity } from "./dns-settings.entity";
-import { DnsSettingsRepository } from "./dns-settings.repository";
+import { ApiConfigService } from '../shared/services/api-config.service';
+import type { DnsEntity } from './dns.entity';
+import type { DnsSettingsEntity } from './dns-settings.entity';
+import { DnsSettingsRepository } from './dns-settings.repository';
 
 /**
  * Audit-row writer for content changes. EVM jobs in `web3compassapi` create
@@ -33,7 +33,7 @@ export class DnsSettingsService {
       : undefined;
 
     const row = this.repo.create({
-      txHash: dns.setupTxHash ?? "",
+      txHash: dns.setupTxHash ?? '',
       cid: dns.cid,
       logoUrl: dns.logoUrl,
       ipfsUrl,
@@ -42,7 +42,7 @@ export class DnsSettingsService {
 
     const saved = await this.repo.save(row);
     this.logger.debug(
-      `dns_settings written for ${dns.name} (cid=${dns.cid ?? "null"})`,
+      `dns_settings written for ${dns.name} (cid=${dns.cid ?? 'null'})`,
     );
 
     return saved;

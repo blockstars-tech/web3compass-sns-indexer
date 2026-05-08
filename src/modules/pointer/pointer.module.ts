@@ -1,8 +1,8 @@
-import { Module } from "@nestjs/common";
+import { Module } from '@nestjs/common';
 
-import { TypeOrmExModule } from "../../db/typeorm-ex.module";
-import { ContentPointerRepository } from "./content-pointer.repository";
-import { ContentPointerService } from "./content-pointer.service";
+import { TypeOrmExModule } from '../../db/typeorm-ex.module';
+import { ContentPointerRepository } from './content-pointer.repository';
+import { ContentPointerService } from './content-pointer.service';
 
 /**
  * Listener-side pointer module: writes only. The full pipeline

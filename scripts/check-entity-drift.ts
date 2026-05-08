@@ -1,3 +1,4 @@
+/* eslint-disable no-console, unicorn/no-process-exit, unicorn/no-null, unicorn/import-style -- CLI script. */
 /**
  * Entity-drift check.
  *
@@ -18,21 +19,18 @@
  * has shipped. We re-enable them as part of the sync, at which point
  * the values match upstream.
  */
-import * as fs from "fs";
-import * as path from "path";
+import { existsSync, readFileSync } from 'fs';
+import { join, resolve } from 'path';
 
-const upstreamRoot = path.resolve(
-  process.env.WEB3COMPASSAPI_PATH ??
-    path.join(__dirname, "../../web3compassapi"),
+const upstreamRoot = resolve(
+  process.env.WEB3COMPASSAPI_PATH ?? join(__dirname, '../../web3compassapi'),
 );
-const localRoot = path.resolve(__dirname, "..");
+const localRoot = resolve(__dirname, '..');
 
-if (!fs.existsSync(upstreamRoot)) {
+if (!existsSync(upstreamRoot)) {
+  console.log(`[drift-check] skipped — upstream not found at ${upstreamRoot}.`);
   console.log(
-    `[drift-check] skipped — upstream not found at ${upstreamRoot}.`,
-  );
-  console.log(
-    "[drift-check] set WEB3COMPASSAPI_PATH or place a checkout adjacent to this repo to enable.",
+    '[drift-check] set WEB3COMPASSAPI_PATH or place a checkout adjacent to this repo to enable.',
   );
   process.exit(0);
 }
@@ -44,49 +42,49 @@ interface IPairing {
 
 const pairs: IPairing[] = [
   {
-    local: "src/modules/dns/dns.entity.ts",
-    upstream: "src/modules/dns/dns.entity.ts",
+    local: 'src/modules/dns/dns.entity.ts',
+    upstream: 'src/modules/dns/dns.entity.ts',
   },
   {
-    local: "src/modules/dns/dns-migration.entity.ts",
-    upstream: "src/modules/dns/dns-migration.entity.ts",
+    local: 'src/modules/dns/dns-migration.entity.ts',
+    upstream: 'src/modules/dns/dns-migration.entity.ts',
   },
   {
-    local: "src/modules/dns/cid-processing/cid-processing.entity.ts",
-    upstream: "src/modules/dns/cid-processing/cid-processing.entity.ts",
+    local: 'src/modules/dns/cid-processing/cid-processing.entity.ts',
+    upstream: 'src/modules/dns/cid-processing/cid-processing.entity.ts',
   },
   {
-    local: "src/modules/dns/url.entity.ts",
-    upstream: "src/modules/dns/url.entity.ts",
+    local: 'src/modules/dns/url.entity.ts',
+    upstream: 'src/modules/dns/url.entity.ts',
   },
   {
-    local: "src/modules/dns/dns-settings.entity.ts",
-    upstream: "src/modules/dns/dns-settings.entity.ts",
+    local: 'src/modules/dns/dns-settings.entity.ts',
+    upstream: 'src/modules/dns/dns-settings.entity.ts',
   },
   {
-    local: "src/modules/dns/ens-resolver.entity.ts",
-    upstream: "src/modules/dns/ens-resolver.entity.ts",
+    local: 'src/modules/dns/ens-resolver.entity.ts',
+    upstream: 'src/modules/dns/ens-resolver.entity.ts',
   },
   {
-    local: "src/modules/pointer/content-pointer.entity.ts",
-    upstream: "src/modules/pointer/content-pointer.entity.ts",
+    local: 'src/modules/pointer/content-pointer.entity.ts',
+    upstream: 'src/modules/pointer/content-pointer.entity.ts',
   },
   {
-    local: "src/modules/common/entities/abstract.entity.ts",
-    upstream: "src/modules/common/entities/abstract.entity.ts",
+    local: 'src/modules/common/entities/abstract.entity.ts',
+    upstream: 'src/modules/common/entities/abstract.entity.ts',
   },
 ];
 
 function read(p: string): string | null {
   try {
-    return fs.readFileSync(p, "utf8");
+    return readFileSync(p, 'utf8');
   } catch {
     return null;
   }
 }
 
 function main(): void {
-  if (!fs.existsSync(upstreamRoot)) {
+  if (!existsSync(upstreamRoot)) {
     // eslint-disable-next-line no-console
     console.warn(
       `[drift-check] Upstream not found at ${upstreamRoot}. Set WEB3COMPASSAPI_PATH or skip in CI.`,
@@ -98,8 +96,8 @@ function main(): void {
   const drifts: string[] = [];
 
   for (const { local, upstream } of pairs) {
-    const localPath = path.join(localRoot, local);
-    const upstreamPath = path.join(upstreamRoot, upstream);
+    const localPath = join(localRoot, local);
+    const upstreamPath = join(upstreamRoot, upstream);
 
     const localContent = read(localPath);
     const upstreamContent = read(upstreamPath);
@@ -108,6 +106,7 @@ function main(): void {
       drifts.push(`MISSING (local): ${local}`);
       continue;
     }
+
     if (upstreamContent === null) {
       drifts.push(`MISSING (upstream): ${upstream}`);
       continue;
@@ -120,17 +119,17 @@ function main(): void {
 
   if (drifts.length > 0) {
     // eslint-disable-next-line no-console
-    console.error("Entity drift detected:\n  " + drifts.join("\n  "));
+    console.error('Entity drift detected:\n  ' + drifts.join('\n  '));
     // eslint-disable-next-line no-console
     console.error(
-      "\nCopy the upstream files into this repo byte-for-byte, then re-run `yarn check:entities`.",
+      '\nCopy the upstream files into this repo byte-for-byte, then re-run `yarn check:entities`.',
     );
     // eslint-disable-next-line unicorn/no-process-exit
     process.exit(1);
   }
 
   // eslint-disable-next-line no-console
-  console.log("[drift-check] OK — all entity files match upstream.");
+  console.log('[drift-check] OK — all entity files match upstream.');
 }
 
 main();

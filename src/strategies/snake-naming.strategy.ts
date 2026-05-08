@@ -1,6 +1,6 @@
-import type { NamingStrategyInterface } from "typeorm";
-import { DefaultNamingStrategy } from "typeorm";
-import { snakeCase } from "typeorm/util/StringUtils";
+import type { NamingStrategyInterface } from 'typeorm';
+import { DefaultNamingStrategy } from 'typeorm';
+import { snakeCase } from 'typeorm/util/StringUtils';
 
 export class SnakeNamingStrategy
   extends DefaultNamingStrategy
@@ -16,7 +16,7 @@ export class SnakeNamingStrategy
     embeddedPrefixes: string[],
   ): string {
     return (
-      snakeCase(embeddedPrefixes.join("_")) +
+      snakeCase(embeddedPrefixes.join('_')) +
       (customName ? customName : snakeCase(propertyName))
     );
   }
@@ -26,7 +26,7 @@ export class SnakeNamingStrategy
   }
 
   joinColumnName(relationName: string, referencedColumnName: string): string {
-    return snakeCase(relationName + "_" + referencedColumnName);
+    return snakeCase(relationName + '_' + referencedColumnName);
   }
 
   joinTableName(
@@ -37,9 +37,9 @@ export class SnakeNamingStrategy
   ): string {
     return snakeCase(
       firstTableName +
-        "_" +
-        firstPropertyName.replace(/\./gi, "_") +
-        "_" +
+        '_' +
+        firstPropertyName.replace(/\./gi, '_') +
+        '_' +
         secondTableName,
     );
   }
@@ -50,7 +50,7 @@ export class SnakeNamingStrategy
     columnName?: string,
   ): string {
     return snakeCase(
-      tableName + "_" + (columnName ? columnName : propertyName),
+      tableName + '_' + (columnName ? columnName : propertyName),
     );
   }
 

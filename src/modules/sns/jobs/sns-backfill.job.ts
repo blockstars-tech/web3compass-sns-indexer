@@ -178,7 +178,7 @@ export class SnsBackfillJob {
     let noReverse = 0;
 
     const provider = this.configService.solanaConfig.provider;
-    const useHeliusV2 = provider === 'helius';
+    const isHeliusV2 = provider === 'helius';
 
     let paginationKey: string | undefined;
 
@@ -186,7 +186,7 @@ export class SnsBackfillJob {
       // eslint-disable-next-line no-await-in-loop
       const page = await UtilsProvider.retryWithExponentialBackoff(
         () =>
-          useHeliusV2
+          isHeliusV2
             ? this.fetchPageHeliusV2(filters, paginationKey)
             : this.fetchPageSdkV1(filters),
         // Patient retries: free-tier endpoints serialize requests on the
@@ -246,12 +246,14 @@ export class SnsBackfillJob {
 
     const response = await fetch(rpcUrl, {
       method: 'POST',
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
 
     if (!response.ok) {
       const text = await response.text().catch(() => '');
+
       // Throw with the HTTP status in the message so the retry helper's
       // status-pattern regex picks it up (429, 503, 504).
       throw new Error(
@@ -271,7 +273,8 @@ export class SnsBackfillJob {
       const msg =
         typeof json.error === 'string'
           ? json.error
-          : json.error.message ?? JSON.stringify(json.error);
+          : (json.error.message ?? JSON.stringify(json.error));
+
       // Surface as Error so retry helper sees the message text and can
       // pattern-match "overloaded" / "try again" against it.
       throw new Error(msg);

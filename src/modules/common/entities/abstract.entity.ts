@@ -2,24 +2,24 @@ import {
   CreateDateColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from "typeorm";
+} from 'typeorm';
 
-import { UtilsProvider } from "../../../providers/utils.provider";
-import type { AbstractDto } from "../dtoes/abstract.dto";
+import { UtilsProvider } from '../../../providers/utils.provider';
+import type { AbstractDto } from '../dtoes/abstract.dto';
 
 export abstract class AbstractEntity<DTO extends AbstractDto> {
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @CreateDateColumn({
-    type: "timestamp without time zone",
-    name: "created_at",
+    type: 'timestamp without time zone',
+    name: 'created_at',
   })
   createdAt: Date;
 
   @UpdateDateColumn({
-    type: "timestamp without time zone",
-    name: "updated_at",
+    type: 'timestamp without time zone',
+    name: 'updated_at',
   })
   updatedAt: Date;
 

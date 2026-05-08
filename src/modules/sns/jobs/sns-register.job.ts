@@ -177,9 +177,10 @@ export class SnsRegisterJob {
     let upserted = 0;
 
     for (const match of matches) {
-      const ok = await this.upsertDomain(match, sig.signature);
+      // eslint-disable-next-line no-await-in-loop
+      const didUpsert = await this.upsertDomain(match, sig.signature);
 
-      if (ok) {
+      if (didUpsert) {
         upserted += 1;
       }
     }
@@ -235,38 +236,38 @@ export class SnsRegisterJob {
       return false;
     }
 
-    let dirty = false;
+    let isDirty = false;
 
     // Backfill any fields the conflicting row was missing. Don't overwrite
     // a populated `setupTxHash` — record-changes may already have stamped
     // a more recent V2-record-write sig there.
     if (!row.setupTxHash) {
       row.setupTxHash = txSignature;
-      dirty = true;
+      isDirty = true;
     }
 
     if (row.ownerAddress !== owner) {
       row.ownerAddress = owner;
       row.address = owner;
-      dirty = true;
+      isDirty = true;
     }
 
     if (!row.node) {
       row.node = node;
-      dirty = true;
+      isDirty = true;
     }
 
     if (row.chain !== ChainEnum.SOLANA) {
       row.chain = ChainEnum.SOLANA;
-      dirty = true;
+      isDirty = true;
     }
 
     if (!row.main) {
       row.main = 'sol';
-      dirty = true;
+      isDirty = true;
     }
 
-    if (dirty) {
+    if (isDirty) {
       await this.dnsRepository.save(row);
     }
 

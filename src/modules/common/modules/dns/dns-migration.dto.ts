@@ -1,8 +1,8 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
-import type { ChainEnum } from "../../../../constants/chain.enum";
-import type { DnsMigrationEntity } from "../../../dns/dns-migration.entity";
-import { AbstractDto } from "../../dtoes/abstract.dto";
+import { ChainEnum } from '../../../../constants/chain.enum';
+import type { DnsMigrationEntity } from '../../../dns/dns-migration.entity';
+import { AbstractDto } from '../../dtoes/abstract.dto';
 
 export class DnsMigrationDto extends AbstractDto {
   @ApiProperty()

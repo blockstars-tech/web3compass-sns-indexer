@@ -39,7 +39,10 @@ async function bootstrap(): Promise<void> {
     );
   } else {
     logger.warn(
-      'Cron jobs DISABLED (ENABLE_SNS_CRONS=false). Crons tick on schedule but each is a no-op. Set ENABLE_SNS_CRONS=true in .env to enable, or use `yarn cli:once <register|reconcile|record-changes>` for one-off runs.',
+      'Cron jobs DISABLED (ENABLE_SNS_CRONS=false). Crons tick on schedule ' +
+        'but each is a no-op. Set ENABLE_SNS_CRONS=true in .env to enable, ' +
+        'or use `yarn cli:once <register|reconcile|record-changes>` for ' +
+        'one-off runs.',
       'Bootstrap',
     );
   }
@@ -51,8 +54,12 @@ async function bootstrap(): Promise<void> {
     process.exit(0);
   };
 
-  process.on('SIGINT', () => shutdown('SIGINT'));
-  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => {
+    void shutdown('SIGINT');
+  });
+  process.on('SIGTERM', () => {
+    void shutdown('SIGTERM');
+  });
 }
 
 bootstrap().catch((error) => {

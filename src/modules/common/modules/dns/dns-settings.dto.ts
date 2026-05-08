@@ -1,7 +1,7 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-import type { DnsSettingsEntity } from "../../../dns/dns-settings.entity";
-import { AbstractDto } from "../../dtoes/abstract.dto";
+import type { DnsSettingsEntity } from '../../../dns/dns-settings.entity';
+import { AbstractDto } from '../../dtoes/abstract.dto';
 
 export class DnsSettingsDto extends AbstractDto {
   @ApiProperty()

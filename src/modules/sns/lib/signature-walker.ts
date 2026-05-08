@@ -37,6 +37,9 @@ export async function collectSignaturesSinceSlot(
   let before: string | undefined;
 
   for (let page = 0; page < options.maxPagesPerTick; page += 1) {
+    // Pagination is inherently sequential — each page's `before` cursor
+    // depends on the previous page's last signature.
+    // eslint-disable-next-line no-await-in-loop
     const result = await UtilsProvider.retryWithExponentialBackoff(() =>
       connection.getSignaturesForAddress(programId, {
         limit: options.pageLimit,

@@ -1,6 +1,6 @@
-import type { DnsTypeEnum } from "../../../../constants/chain.enum";
-import type { EnsResolverEntity } from "../../../dns/ens-resolver.entity";
-import { AbstractDto } from "../../dtoes/abstract.dto";
+import type { DnsTypeEnum } from '../../../../constants/chain.enum';
+import type { EnsResolverEntity } from '../../../dns/ens-resolver.entity';
+import { AbstractDto } from '../../dtoes/abstract.dto';
 
 export class EnsResolverDto extends AbstractDto {
   address: string;

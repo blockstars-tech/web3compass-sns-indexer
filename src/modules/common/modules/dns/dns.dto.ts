@@ -1,10 +1,10 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-import { ChainEnum } from "../../../../constants/chain.enum";
-import type { DnsEntity } from "../../../dns/dns.entity";
-import { AbstractDto } from "../../dtoes/abstract.dto";
-import type { EnsResolverDto } from "../shared/ens-resolver.dto";
-import type { UrlDto } from "./url.dto";
+import { ChainEnum } from '../../../../constants/chain.enum';
+import type { DnsEntity } from '../../../dns/dns.entity';
+import { AbstractDto } from '../../dtoes/abstract.dto';
+import { EnsResolverDto } from '../shared/ens-resolver.dto';
+import type { UrlDto } from './url.dto';
 
 export class DnsDto extends AbstractDto {
   @ApiProperty()
@@ -75,7 +75,7 @@ export class DnsDto extends AbstractDto {
     if (dns.address) {
       this.address = dns.address;
       this.scannerUrl = `https://${
-        dns.chain === ChainEnum.ETH ? "etherscan.io" : "polygonscan.com"
+        dns.chain === ChainEnum.ETH ? 'etherscan.io' : 'polygonscan.com'
       }/address/${dns.address}`;
     }
   }

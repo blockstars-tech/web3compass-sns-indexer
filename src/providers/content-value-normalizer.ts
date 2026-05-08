@@ -12,33 +12,33 @@
  *               `<host>/<43-char-tx>[/...]` arweave gateway URLs.
  */
 
-const WHITESPACE = /^[\s ]+|[\s ]+$/g;
+const WHITESPACE = /^\s+|\s+$/g;
 const IPFS_PREFIX = /^ipfs:(?:\/\/)?/i;
 const ARWEAVE_PREFIX = /^(?:arwv|ar):(?:\/\/)?/i;
-const IPFS_PATH_GATEWAY = /^https?:\/\/[^/]+\/ipfs\/([^/?#\s]+)/i;
-const IPFS_SUBDOMAIN_GATEWAY = /^https?:\/\/([^./\s]+)\.ipfs\.[^/\s]+/i;
-const ARWEAVE_GATEWAY = /^https?:\/\/[^/]+\/([A-Za-z0-9_-]{43})(?:[/?#]|$)/;
+const IPFS_PATH_GATEWAY = /^https?:\/\/[^/]+\/ipfs\/([^\s#/?]+)/i;
+const IPFS_SUBDOMAIN_GATEWAY = /^https?:\/\/([^\s./]+)\.ipfs\.[^\s/]+/i;
+const ARWEAVE_GATEWAY = /^https?:\/\/[^/]+\/([\w-]{43})(?:[#/?]|$)/;
 const TRAILING_SLASH = /\/+$/;
-const QUERY_OR_FRAGMENT = /[?#].*$/;
-const CIDV1_PREFIX = /^baf[a-z2-7]/i;
+const QUERY_OR_FRAGMENT = /[#?].*$/;
+const CIDV1_PREFIX = /^baf[2-7a-z]/i;
 
-export type ContentKind = "ipfs" | "arweave";
+export type ContentKind = 'ipfs' | 'arweave';
 
 export function normalizeContentValue(
   raw: string | null | undefined,
   kind: ContentKind,
 ): string {
   if (!raw) {
-    return "";
+    return '';
   }
 
-  let s = raw.replace(WHITESPACE, "");
+  let s = raw.replace(WHITESPACE, '');
 
   if (s.length === 0) {
     return s;
   }
 
-  if (kind === "ipfs") {
+  if (kind === 'ipfs') {
     const subdomain = IPFS_SUBDOMAIN_GATEWAY.exec(s);
 
     if (subdomain) {
@@ -46,24 +46,16 @@ export function normalizeContentValue(
     } else {
       const path = IPFS_PATH_GATEWAY.exec(s);
 
-      if (path) {
-        s = path[1];
-      } else {
-        s = s.replace(IPFS_PREFIX, "");
-      }
+      s = path ? path[1] : s.replace(IPFS_PREFIX, '');
     }
   } else {
     const gateway = ARWEAVE_GATEWAY.exec(s);
 
-    if (gateway) {
-      s = gateway[1];
-    } else {
-      s = s.replace(ARWEAVE_PREFIX, "");
-    }
+    s = gateway ? gateway[1] : s.replace(ARWEAVE_PREFIX, '');
   }
 
-  s = s.replace(QUERY_OR_FRAGMENT, "");
-  s = s.replace(TRAILING_SLASH, "");
+  s = s.replace(QUERY_OR_FRAGMENT, '');
+  s = s.replace(TRAILING_SLASH, '');
 
   // CIDv1 base32 is case-insensitive per spec; multiformats parsers tend to
   // be strict. Lowercasing recovers users who shift-key'd part of the CID.
@@ -72,5 +64,5 @@ export function normalizeContentValue(
     s = s.toLowerCase();
   }
 
-  return s.length > 0 ? s : raw.replace(WHITESPACE, "");
+  return s.length > 0 ? s : raw.replace(WHITESPACE, '');
 }

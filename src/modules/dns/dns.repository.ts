@@ -1,19 +1,19 @@
-import { Repository } from "typeorm";
+import { Repository } from 'typeorm';
 
-import { CustomRepository } from "../../db/typeorm-ex.decorator";
-import { DnsEntity } from "./dns.entity";
+import { CustomRepository } from '../../db/typeorm-ex.decorator';
+import { DnsEntity } from './dns.entity';
 
 @CustomRepository(DnsEntity)
 export class DnsRepository extends Repository<DnsEntity> {
   async findByNode(node: string) {
-    return this.createQueryBuilder("dns")
-      .where("dns.node = :node", { node })
+    return this.createQueryBuilder('dns')
+      .where('dns.node = :node', { node })
       .getOne();
   }
 
   async findByName(name: string) {
-    return this.createQueryBuilder("dns")
-      .where("dns.name = :name", { name })
+    return this.createQueryBuilder('dns')
+      .where('dns.name = :name', { name })
       .getOne();
   }
 
@@ -39,14 +39,14 @@ export class DnsRepository extends Repository<DnsEntity> {
    * workflow.
    */
   async findUnresolved(chain: string, limit = 100): Promise<DnsEntity[]> {
-    return this.createQueryBuilder("dns")
-      .where("dns.chain = :chain", { chain })
-      .andWhere("dns.cid IS NULL")
+    return this.createQueryBuilder('dns')
+      .where('dns.chain = :chain', { chain })
+      .andWhere('dns.cid IS NULL')
       .andWhere(
-        "(dns.is_fetch_failed IS NULL OR dns.is_fetch_failed = :failed)",
+        '(dns.is_fetch_failed IS NULL OR dns.is_fetch_failed = :failed)',
         { failed: false },
       )
-      .orderBy("dns.created_at", "ASC")
+      .orderBy('dns.created_at', 'ASC')
       .limit(limit)
       .getMany();
   }

@@ -22,11 +22,14 @@ import { SnsReconcileJob } from '../modules/sns/jobs/sns-reconcile.job';
 import { SnsRecordChangesJob } from '../modules/sns/jobs/sns-record-changes.job';
 import { SnsRegisterJob } from '../modules/sns/jobs/sns-register.job';
 
+// Kebab-case CLI argument; matches the user-facing job name.
+/* eslint-disable @typescript-eslint/naming-convention, quote-props */
 const TARGETS = {
   register: SnsRegisterJob,
   reconcile: SnsReconcileJob,
   'record-changes': SnsRecordChangesJob,
 } as const;
+/* eslint-enable @typescript-eslint/naming-convention, quote-props */
 
 type TargetName = keyof typeof TARGETS;
 
