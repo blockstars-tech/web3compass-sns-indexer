@@ -1,0 +1,74 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage
+.nyc_output
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# TypeScript v1 declaration files
+typings/
+
+# Yarn cache and integrity
+.yarn-integrity
+.yarn/cache
+.yarn/install-state.gz
+.pnp.*
+
+# eslint cache
+.eslintcache
+
+# Output of npm/yarn pack
+*.tgz
+
+# npm lockfile — this project uses Yarn; npm lockfiles must not be committed
+package-lock.json
+
+# Build outputs
+dist/
+build/
+
+# IDE / editor
+.idea
+*.iml
+out/
+gen/
+.vscode/
+.DS_Store
+
+# Docker
+db-data/
+
+# Environment — NEVER commit; .env.example is the only env file checked in
+.env
+.env.*
+!.env.example
+
+# ----------------------------------------------------------------------------
+# Internal-only artifacts.
+#
+# Everything below is intentionally kept LOCAL ONLY. It supports the
+# original maintainer's workflow (AI tooling, internal docs, project
+# planning) but is not part of the public hackathon-visible surface.
+# Do not remove these entries unless you are deliberately publishing
+# the docs / AI configs.
+# ----------------------------------------------------------------------------
+
+docs/
+CLAUDE.md
+AGENTS.md
+.claude/
+.cursor/
