@@ -24,7 +24,7 @@ export interface ISignatureWalkerOptions {
  * Why `>=` rather than `>`: multiple signatures can land in the same
  * slot. Refiltering on the boundary slot is paired with idempotent
  * upserts in the caller; together they cover the edge case losslessly
- * without a precise signature cursor (see `project_sns_indexer_decisions.md`).
+ * without needing a precise signature cursor.
  */
 export async function collectSignaturesSinceSlot(
   connection: Connection,

@@ -40,7 +40,7 @@ function makeEffects(): IReconcileSideEffects & {
 }
 
 describe('applyResolution', () => {
-  it('first hit (no previous CID): writes cid, ipfsProcessed=false (queues for scrap-api), audit + sync fire', async () => {
+  it('first hit (no previous CID): writes cid, ipfsProcessed=false (queues for the downstream content-indexer), audit + sync fire', async () => {
     const effects = makeEffects();
     const row = makeRow();
 
@@ -58,7 +58,7 @@ describe('applyResolution', () => {
     expect(row.cid).toBe('QmNew');
     expect(row.contentType).toBe('ipfs-ns');
     expect(row.ipfsFetchStatus).toBe(StatusCodes.SUCCESS);
-    // ipfsProcessed=false hands off to scrap-api (it filters
+    // ipfsProcessed=false hands off to the downstream content-indexer (it filters
     // ipfs_processed=false to find work).
     expect(row.ipfsProcessed).toBe(false);
     expect(row.isFetchFailed).toBe(false);
@@ -88,14 +88,14 @@ describe('applyResolution', () => {
     );
 
     expect(row.cid).toBe('QmSame');
-    // `attempt` is the scrap-api retry counter — reconcile never resets it
-    // on the same-cid path; only scrap-api does on a successful scrape.
+    // `attempt` is the the downstream content-indexer retry counter — reconcile never resets it
+    // on the same-cid path; only the downstream content-indexer does on a successful scrape.
     expect(row.attempt).toBe(5);
     // Resolution succeeded, so the consecutive-miss counter resets.
     expect(row.ipfsFetchAttempt).toBe(0);
     expect(row.isFetchFailed).toBe(false);
     expect(row.ipfsFetchStatus).toBe(StatusCodes.SUCCESS);
-    // ipfsProcessed must NOT change on same-cid — scrap-api owns it on
+    // ipfsProcessed must NOT change on same-cid — the downstream content-indexer owns it on
     // this path.
     expect(row.ipfsProcessed).toBe(true);
     expect(effects.handleCidChange).not.toHaveBeenCalled();
@@ -103,7 +103,7 @@ describe('applyResolution', () => {
     expect(effects.syncFromDns).not.toHaveBeenCalled();
   });
 
-  it('hit with new CID (changed): handleCidChange runs, counters reset, ipfsProcessed=false re-queues for scrap-api', async () => {
+  it('hit with new CID (changed): handleCidChange runs, counters reset, ipfsProcessed=false re-queues for the downstream content-indexer', async () => {
     const effects = makeEffects();
     const row = makeRow({
       cid: 'QmOld',

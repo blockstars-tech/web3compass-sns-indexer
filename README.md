@@ -1,10 +1,15 @@
 # web3compass-sns-indexer
 
-Solana Name Service (`.sol`) indexer for web3compass.
+A production-grade Solana Name Service (`.sol`) indexer that resolves
+V2/V1 IPFS and Arweave content for the full population of `.sol`
+domains. Designed to run reliably on rate-limited RPC: a four-job
+state machine, a 256-partition incremental backfill, process-wide
+RPC throttling via a token bucket, and held-cursor invariants that
+never advance past a failed item.
 
-This service watches the SPL Name Service program and the SNS Records V2
-program on Solana, and writes domain rows + content pointers (IPFS,
-Arweave) into the web3compass Postgres database.
+Watches the SPL Name Service program and the SNS Records V2 program on
+Solana and writes domain rows + content pointers (IPFS, Arweave) into
+the web3compass Postgres database.
 
 ## What this is
 
@@ -179,10 +184,11 @@ logs for `tick failed` or `signature failed` (rare under paid RPC).
 
 ## Status
 
-`v0.1.0-dev`. Jobs (register, record-changes, reconcile, backfill) are
-implemented and unit-tested. Live cursors are wired. Cron jobs are
-gated by `ENABLE_SNS_CRONS` so a deploy can ship in idle mode and the
-operator flips the switch when ready.
+All four jobs (register, record-changes, reconcile, backfill) are
+implemented and unit-tested. Live cursors are wired and tested
+end-to-end against mainnet. Cron jobs are gated by `ENABLE_SNS_CRONS`
+so a deploy can ship in idle mode and the operator flips the switch
+when ready.
 
 ## License
 

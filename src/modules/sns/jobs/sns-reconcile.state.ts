@@ -11,7 +11,7 @@ import { type IResolvedContent } from '../../shared/services/sns.service';
  * around it — never pulls in the entity decorator graph.
  *
  * `needsReindex` is intentionally absent: it's a manual admin-trigger flag
- * (set by `prepareIndexedRecordsForReindexing` in scrap-api), not part of
+ * (set by `prepareIndexedRecordsForReindexing` in the downstream content-indexer), not part of
  * any internal SNS workflow. The SNS reconcile queue is selected by
  * `cid IS NULL` instead.
  */
@@ -50,7 +50,7 @@ export interface IReconcileSideEffects {
  * **only on cid-change paths**, matching the EVM convention. A successful
  * re-resolution that returns the same CID is a no-op on those side effects.
  *
- * `ipfsProcessed=false` on a new CID is the signal scrap-api uses to queue
+ * `ipfsProcessed=false` on a new CID is the signal the downstream content-indexer uses to queue
  * the row for indexing (`dns.repository.ts:62` filters
  * `ipfs_processed=false`). Setting it to `true` means "no IPFS work to do"
  * — used on miss paths.
@@ -79,7 +79,7 @@ export async function applyResolution(
   if (newCid && result.contentType) {
     if (newCid !== oldCid) {
       // Hit — new or changed cid. Detach from old CID group, write new
-      // cid, reset retry counters, hand off to scrap-api via
+      // cid, reset retry counters, hand off to the downstream content-indexer via
       // ipfsProcessed=false.
       if (oldCid) {
         await effects.handleCidChange(row, oldCid);
@@ -105,7 +105,7 @@ export async function applyResolution(
       // Hit — same cid. Resolution succeeded but nothing changed on-chain.
       // Mirror EVM's "no-change" exit: refresh status flags, but do not
       // write an audit row or resync the pointer. `ipfsProcessed` is owned
-      // by scrap-api on this path.
+      // by the downstream content-indexer on this path.
       row.ipfsFetchStatus = StatusCodes.SUCCESS;
       row.ipfsFetchAttempt = 0;
       row.isFetchFailed = false;

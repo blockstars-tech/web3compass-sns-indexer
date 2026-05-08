@@ -27,6 +27,16 @@ const upstreamRoot = path.resolve(
 );
 const localRoot = path.resolve(__dirname, "..");
 
+if (!fs.existsSync(upstreamRoot)) {
+  console.log(
+    `[drift-check] skipped — upstream not found at ${upstreamRoot}.`,
+  );
+  console.log(
+    "[drift-check] set WEB3COMPASSAPI_PATH or place a checkout adjacent to this repo to enable.",
+  );
+  process.exit(0);
+}
+
 interface IPairing {
   local: string;
   upstream: string;
@@ -113,8 +123,7 @@ function main(): void {
     console.error("Entity drift detected:\n  " + drifts.join("\n  "));
     // eslint-disable-next-line no-console
     console.error(
-      "\nRun the /sync-entities Claude skill, or copy the upstream files manually,\n" +
-        "then re-run `yarn check:entities`.",
+      "\nCopy the upstream files into this repo byte-for-byte, then re-run `yarn check:entities`.",
     );
     // eslint-disable-next-line unicorn/no-process-exit
     process.exit(1);

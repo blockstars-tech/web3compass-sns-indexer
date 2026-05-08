@@ -1,6 +1,6 @@
 {
   "name": "web3compass-sns-indexer",
-  "version": "0.1.0-dev",
+  "version": "0.1.0",
   "private": true,
   "description": "Solana Name Service (.sol) indexer that writes into the shared web3compass Postgres database.",
   "license": "MIT",

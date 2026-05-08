@@ -29,9 +29,9 @@ export enum PointerState {
  * mutable kind (ipns-ns, swarm-ns, dnslink, ...). Immutable ipfs-ns rows
  * do not get a pointer row; their dns.cid is already the anchor.
  *
- * Listener-side copy. Resolution + ingestion live in the scrap-api repo;
- * this module only handles writes (insert/update/delete) on
- * ContenthashChanged events. Will become a shared package later.
+ * Listener-side copy. Resolution + ingestion live in the downstream
+ * content-indexer; this module only handles writes (insert/update/delete)
+ * on ContenthashChanged events. Will become a shared package later.
  */
 @Entity({ name: "content_pointer" })
 export class ContentPointerEntity extends AbstractEntity<AbstractDto> {

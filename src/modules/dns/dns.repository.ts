@@ -34,8 +34,9 @@ export class DnsRepository extends Repository<DnsEntity> {
    *    `is_fetch_failed` on a hit) or admin intervention.
    *
    * `needs_reindex` is **not** in this query — that flag is reserved for
-   * the admin "manual re-trigger" path used by scrap-api's
-   * `prepareIndexedRecordsForReindexing`, not the SNS workflow.
+   * the admin "manual re-trigger" path used by the downstream
+   * content-indexer's `prepareIndexedRecordsForReindexing`, not the SNS
+   * workflow.
    */
   async findUnresolved(chain: string, limit = 100): Promise<DnsEntity[]> {
     return this.createQueryBuilder("dns")

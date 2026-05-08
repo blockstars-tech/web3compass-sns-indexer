@@ -57,18 +57,7 @@ db-data/
 .env.*
 !.env.example
 
-# ----------------------------------------------------------------------------
-# Internal-only artifacts.
-#
-# Everything below is intentionally kept LOCAL ONLY. It supports the
-# original maintainer's workflow (AI tooling, internal docs, project
-# planning) but is not part of the public hackathon-visible surface.
-# Do not remove these entries unless you are deliberately publishing
-# the docs / AI configs.
-# ----------------------------------------------------------------------------
-
-docs/
-CLAUDE.md
-AGENTS.md
 .claude/
 .cursor/
+CLAUDE.md
+AGENTS.md
