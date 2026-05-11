@@ -87,7 +87,8 @@ src/
 │     → cid IS NULL AND                │
 │       NOT is_fetch_failed            │
 │   resolveContent(): V2-IPFS,         │
-│     V1-IPFS, V2-ARWV, V1-ARWV        │
+│     V1-IPFS, V2-IPNS, V1-IPNS,       │
+│     V2-ARWV, V1-ARWV                 │
 │   applyResolution() → write          │
 │     cid, contentType, audit row,     │
 │     content_pointer                  │

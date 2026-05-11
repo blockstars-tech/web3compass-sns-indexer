@@ -13,7 +13,7 @@ Shadow Drive) are stored in **child accounts** off the domain.
 
 | Program | ID | Purpose |
 |---|---|---|
-| SPL Name Service | `namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkx` | Generic name registry. Hosts all `.sol` and their record children. |
+| SPL Name Service | `namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX` | Generic name registry. Hosts all `.sol` and their record children. |
 | SNS Records V2 | `HP3D4D1ZCmohQGFVms2SS4LCANgJyksBf5s1F77FuFjZ` | Newer record format with ROA / staleness verification (SNS-IP-3). |
 | `.sol` TLD root | `58PwtjSDuFHuUkYjH9BYnnQKHfwo9reZhC2zMJv9JPkx` | Parent name-record account; top-level `.sol` domains' `parentName` field points here. |
 
@@ -45,12 +45,16 @@ For each `.sol` domain, in order:
 
 1. V2 IPFS (with valid ROA → return)
 2. V1 IPFS
-3. V2 ARWV (with valid ROA → return)
-4. V1 ARWV
-5. No content.
+3. V2 IPNS (with valid ROA → return)
+4. V1 IPNS
+5. V2 ARWV (with valid ROA → return)
+6. V1 ARWV
+7. No content.
 
 The first match wins. We mirror the priority used by SNS clients
-(Brave, sns.id, 4everland) but skip URL/SHDW for v1.
+(Brave, sns.id, 4everland) but skip URL/SHDW for v1. An IPFS slot whose
+payload is `ipns://<key>` (SNS-client convention) is classified as
+IPNS and re-routed accordingly — see `detectIpnsFromIpfsValue`.
 
 ## Two indexing problems, two mechanisms
 
@@ -83,7 +87,7 @@ V2 introduces optional renewals but they're not the norm. So
 | `name` | `"foo.sol"` |
 | `node` | the SPL name-service account pubkey, base58 |
 | `cid` | IPFS CID or Arweave transaction id |
-| `contentType` | `'ipfs-ns'` or `'arweave-ns'` |
+| `contentType` | `'ipfs-ns'`, `'ipns-ns'`, or `'arweave-ns'` |
 | `setupTxHash` | the Solana signature (base58 ~88-char) |
 | `ownerAddress` | base58 wallet pubkey, **never lowercased** |
 | `chain` | `'solana'` |

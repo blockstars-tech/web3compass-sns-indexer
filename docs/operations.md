@@ -29,9 +29,12 @@ This repo runs with `migrationsRun: false`. When a schema change is
 required for SNS:
 
 1. **Land the migration in `web3compassapi` first.** Open a PR there.
-   For enum additions (e.g. new `ChainEnum.SOLANA`), the migration class
-   must set `transaction = false` because Postgres can't `ALTER TYPE`
-   inside a transaction.
+   The shipped pattern for enum additions (see
+   `AddSnsSupport1777881600000`) extends the enum via
+   `RENAME TYPE → CREATE TYPE → ALTER COLUMN TYPE → DROP _old`, which
+   runs inside a single transaction. Only resort to `transaction =
+   false` + `ALTER TYPE … ADD VALUE` if a future change cannot be
+   expressed as a column-recast.
 2. **Deploy `web3compassapi`.** Wait for the migration to apply.
 3. **Sync entity files in this repo.** Copy the changed entities from
    `web3compassapi` byte-for-byte (`yarn check:entities` enforces exact

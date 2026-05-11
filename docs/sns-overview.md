@@ -53,10 +53,13 @@ V1 vs V2 records:
   data was set by the *current* owner; staleness invalidates it on
   transfer.
 
-We resolve **V2 first, V1 as fallback**, separately for IPFS and
-Arweave. Order: `V2-IPFS → V1-IPFS → V2-ARWV → V1-ARWV → none`. A V2
-record whose ROA fails verification is treated as **missing**, falling
-through to the next step.
+We resolve **V2 first, V1 as fallback**, separately for IPFS, IPNS, and
+Arweave. Order:
+`V2-IPFS → V1-IPFS → V2-IPNS → V1-IPNS → V2-ARWV → V1-ARWV → none`.
+A V2 record whose ROA fails verification is treated as **missing**,
+falling through to the next step. An IPFS slot whose value is
+`ipns://<key>` is reclassified as IPNS (SNS-client convention) and a
+mutable-pointer row is created instead of an immutable `ipfs-ns` row.
 
 ---
 
@@ -133,7 +136,7 @@ drains the queue on its own cadence.
    changes (see 3.3).
 2. For each row, `PromisePool.withConcurrency(SNS_RESOLVE_CONCURRENCY)`
    calls `snsService.resolveContent(bareName)` — runs the
-   V2-IPFS → V1-IPFS → V2-ARWV → V1-ARWV chain.
+   V2-IPFS → V1-IPFS → V2-IPNS → V1-IPNS → V2-ARWV → V1-ARWV chain.
 3. Apply the result via `applyResolution` (the shared state machine):
    - **Hit, new cid** → write `cid`, `contentType`, reset retry
      counters, `ipfsProcessed=false` (this hands the row to the downstream content-indexer,
@@ -344,7 +347,8 @@ reverse-looks up + race-safe upserts before resolving.
 
 - Drains `chain=solana AND cid IS NULL AND NOT is_fetch_failed`,
   oldest-first.
-- Runs the V2-IPFS → V1-IPFS → V2-ARWV → V1-ARWV chain per row.
+- Runs the V2-IPFS → V1-IPFS → V2-IPNS → V1-IPNS → V2-ARWV → V1-ARWV
+  chain per row.
 - Same `applyResolution` writes as record-changes.
 
 Once a row has a CID, **it leaves this job's queue forever**. Future
@@ -353,8 +357,8 @@ flagging anything. This is the architectural decision that lets us
 keep `needsReindex` reserved for the downstream content-indexer's admin path.
 
 Per-tick log line summarizes resolution-source distribution:
-`v2-ipfs=N v1-ipfs=N v2-arwv=N v1-arwv=N none=N` — useful for capacity
-tuning.
+`v2-ipfs=N v1-ipfs=N v2-ipns=N v1-ipns=N v2-arwv=N v1-arwv=N none=N` —
+useful for capacity tuning.
 
 ### 4.4 `sns-backfill.job` — what it does
 
@@ -483,8 +487,8 @@ and backfilled domains in parallel.
 4. Watch logs.
    - "SNS backfill: partition 17 done (accounts=2840 attempted=2812
       noReverse=28)" — backfill progress
-   - "SNS reconcile: v2-ipfs=N v1-ipfs=N v2-arwv=N v1-arwv=N none=N"
-      — resolution distribution
+   - "SNS reconcile: v2-ipfs=N v1-ipfs=N v2-ipns=N v1-ipns=N
+      v2-arwv=N v1-arwv=N none=N" — resolution distribution
    - "SNS backfill: COMPLETE — all 256 partitions processed" — done
 
 5. Once backfill is COMPLETE, you can leave SNS_BACKFILL_ENABLED=true;
@@ -562,7 +566,7 @@ they re-process some signatures.
 | `name` | register / record-changes / backfill | `"<bare>.sol"` |
 | `node` | register / record-changes / backfill | base58 of the domain account pubkey |
 | `cid` | reconcile / record-changes (via `applyResolution`) | IPFS CID or Arweave tx id |
-| `contentType` | reconcile / record-changes | `'ipfs-ns'` or `'arweave-ns'` |
+| `contentType` | reconcile / record-changes | `'ipfs-ns'`, `'ipns-ns'`, or `'arweave-ns'` |
 | `setupTxHash` | register on insert; record-changes overwrites with the V2 sig | Solana base58 signature (~88 chars) |
 | `ownerAddress` | register / record-changes | base58 wallet pubkey, **never lowercased** |
 | `address` | register / record-changes | same as `ownerAddress` for v1 |
