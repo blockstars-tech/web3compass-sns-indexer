@@ -23,6 +23,30 @@ const CIDV1_PREFIX = /^baf[2-7a-z]/i;
 
 export type ContentKind = 'ipfs' | 'ipns' | 'arweave';
 
+function extractIpfs(s: string): string {
+  const subdomain = IPFS_SUBDOMAIN_GATEWAY.exec(s);
+
+  if (subdomain) {
+    return subdomain[1];
+  }
+
+  const path = IPFS_PATH_GATEWAY.exec(s);
+
+  return path ? path[1] : s.replace(IPFS_PREFIX, '');
+}
+
+function extractIpns(s: string): string {
+  const subdomain = IPNS_SUBDOMAIN_GATEWAY.exec(s);
+
+  if (subdomain) {
+    return subdomain[1];
+  }
+
+  const path = IPNS_PATH_GATEWAY.exec(s);
+
+  return path ? path[1] : s.replace(IPNS_PREFIX, '');
+}
+
 export function normalizeContentValue(
   raw: string | null | undefined,
   kind: ContentKind,
@@ -58,30 +82,6 @@ export function normalizeContentValue(
   }
 
   return s.length > 0 ? s : raw.replace(WHITESPACE, '');
-}
-
-function extractIpfs(s: string): string {
-  const subdomain = IPFS_SUBDOMAIN_GATEWAY.exec(s);
-
-  if (subdomain) {
-    return subdomain[1];
-  }
-
-  const path = IPFS_PATH_GATEWAY.exec(s);
-
-  return path ? path[1] : s.replace(IPFS_PREFIX, '');
-}
-
-function extractIpns(s: string): string {
-  const subdomain = IPNS_SUBDOMAIN_GATEWAY.exec(s);
-
-  if (subdomain) {
-    return subdomain[1];
-  }
-
-  const path = IPNS_PATH_GATEWAY.exec(s);
-
-  return path ? path[1] : s.replace(IPNS_PREFIX, '');
 }
 
 /**

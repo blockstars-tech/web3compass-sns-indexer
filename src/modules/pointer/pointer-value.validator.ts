@@ -1,7 +1,7 @@
 // Match `scheme:` with or without `//`. Legitimate pointer values (IPNS keys,
 // DNSLink hostnames, Swarm feed refs) never start with an alpha-led scheme +
 // colon, so this catches both `ipns://k51...` and `ipns:k51...`.
-const SCHEME_PREFIX = /^[a-z][a-z0-9+\-.]*:/i;
+const SCHEME_PREFIX = /^[a-z][\d+.a-z-]*:/i;
 const WHITESPACE = /\s/;
 const MAX_LENGTH = 256;
 

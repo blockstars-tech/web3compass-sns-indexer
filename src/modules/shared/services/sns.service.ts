@@ -24,11 +24,8 @@ import {
   normalizeContentValue,
 } from '../../../providers/content-value-normalizer';
 import { UtilsProvider } from '../../../providers/utils.provider';
+import { type IRecordReadResult, type IResolvedContent } from './sns.types';
 import { SolanaService } from './solana.service';
-import {
-  type IRecordReadResult,
-  type IResolvedContent,
-} from './sns.types';
 
 const MISSING_ACCOUNT_HINTS = [
   'could not find',
@@ -60,8 +57,13 @@ function recordKind(record: SnsRecord): ContentKind | undefined {
 }
 
 function contentTypeForKind(kind: ContentKind): ContentType {
-  if (kind === 'ipfs') return ContentType.IPFS;
-  if (kind === 'ipns') return ContentType.IPNS;
+  if (kind === 'ipfs') {
+    return ContentType.IPFS;
+  }
+
+  if (kind === 'ipns') {
+    return ContentType.IPNS;
+  }
 
   return ContentType.ARWEAVE;
 }
