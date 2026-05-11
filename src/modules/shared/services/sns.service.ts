@@ -20,20 +20,15 @@ import { InjectPinoLogger, type PinoLogger } from 'nestjs-pino';
 import { ContentType } from '../../../constants/sns.constants';
 import {
   type ContentKind,
+  detectIpnsFromIpfsValue,
   normalizeContentValue,
 } from '../../../providers/content-value-normalizer';
 import { UtilsProvider } from '../../../providers/utils.provider';
 import { SolanaService } from './solana.service';
-
-export type ResolutionSource = 'v2-ipfs' | 'v1-ipfs' | 'v2-arwv' | 'v1-arwv';
-
-export interface IResolvedContent {
-  cid?: string;
-  contentType?: ContentType;
-  source?: ResolutionSource;
-  /** True only when the V2 record's ROA + staleness signatures verify against the current owner. */
-  roaVerified?: boolean;
-}
+import {
+  type IRecordReadResult,
+  type IResolvedContent,
+} from './sns.types';
 
 const MISSING_ACCOUNT_HINTS = [
   'could not find',
@@ -48,21 +43,37 @@ function isMissingAccountError(error: unknown): boolean {
   return MISSING_ACCOUNT_HINTS.some((hint) => msg.includes(hint));
 }
 
-function recordKind(record: SnsRecord): ContentKind {
-  return record === SnsRecord.IPFS ? 'ipfs' : 'arweave';
+function recordKind(record: SnsRecord): ContentKind | undefined {
+  if (record === SnsRecord.IPFS) {
+    return 'ipfs';
+  }
+
+  if (record === SnsRecord.IPNS) {
+    return 'ipns';
+  }
+
+  if (record === SnsRecord.ARWV) {
+    return 'arweave';
+  }
+
+  return undefined;
+}
+
+function contentTypeForKind(kind: ContentKind): ContentType {
+  if (kind === 'ipfs') return ContentType.IPFS;
+  if (kind === 'ipns') return ContentType.IPNS;
+
+  return ContentType.ARWEAVE;
 }
 
 /**
- * SNS resolver. Resolution order: V2-IPFS → V1-IPFS → V2-ARWV → V1-ARWV.
+ * SNS resolver. Resolution order:
+ *   V2-IPFS → V1-IPFS → V2-IPNS → V1-IPNS → V2-ARWV → V1-ARWV → none.
  *
- * A V2 record whose ROA or staleness verification fails is treated as
- * MISSING and the chain falls through to the next step. Empty / null-byte
- * payloads are also treated as missing.
- *
- * Owner reads use a direct `getAccountInfo` + `NameRegistryState.deserialize`
- * to avoid the SDK's `getTokenLargestAccounts` round-trip — that method
- * is unreliable on some RPC providers (e.g. Alchemy returns 503), and we
- * don't need the wrapped-NFT-owner heuristic for indexing.
+ * First hit wins. A V2 record whose ROA or staleness verification fails is
+ * treated as MISSING; empty/null-byte payloads likewise. Owner reads bypass
+ * the SDK's `getTokenLargestAccounts` round-trip (unreliable on some RPC
+ * providers) by reading the registry account directly.
  */
 @Injectable()
 export class SnsService {
@@ -76,8 +87,8 @@ export class SnsService {
 
     if (v2Ipfs) {
       return {
-        cid: v2Ipfs,
-        contentType: ContentType.IPFS,
+        cid: v2Ipfs.value,
+        contentType: v2Ipfs.contentType,
         source: 'v2-ipfs',
         roaVerified: true,
       };
@@ -87,9 +98,30 @@ export class SnsService {
 
     if (v1Ipfs) {
       return {
-        cid: v1Ipfs,
-        contentType: ContentType.IPFS,
+        cid: v1Ipfs.value,
+        contentType: v1Ipfs.contentType,
         source: 'v1-ipfs',
+      };
+    }
+
+    const v2Ipns = await this.tryRecordV2(name, SnsRecord.IPNS);
+
+    if (v2Ipns) {
+      return {
+        cid: v2Ipns.value,
+        contentType: v2Ipns.contentType,
+        source: 'v2-ipns',
+        roaVerified: true,
+      };
+    }
+
+    const v1Ipns = await this.tryRecordV1(name, SnsRecord.IPNS);
+
+    if (v1Ipns) {
+      return {
+        cid: v1Ipns.value,
+        contentType: v1Ipns.contentType,
+        source: 'v1-ipns',
       };
     }
 
@@ -97,8 +129,8 @@ export class SnsService {
 
     if (v2Arwv) {
       return {
-        cid: v2Arwv,
-        contentType: ContentType.ARWEAVE,
+        cid: v2Arwv.value,
+        contentType: v2Arwv.contentType,
         source: 'v2-arwv',
         roaVerified: true,
       };
@@ -108,13 +140,48 @@ export class SnsService {
 
     if (v1Arwv) {
       return {
-        cid: v1Arwv,
-        contentType: ContentType.ARWEAVE,
+        cid: v1Arwv.value,
+        contentType: v1Arwv.contentType,
         source: 'v1-arwv',
       };
     }
 
     return {};
+  }
+
+  /**
+   * Classify raw record bytes into `{value, contentType}`. `slotKind` is the
+   * Bonfida slot we read from; the returned `contentType` is the *actual*
+   * classification — they can differ when an IPFS slot embeds `ipns://...`
+   * (SNS-client convention), in which case we return `ContentType.IPNS`.
+   */
+  private classifyRecordContent(
+    rawValue: string,
+    record: SnsRecord,
+  ): IRecordReadResult | undefined {
+    const slotKind = recordKind(record);
+
+    if (!slotKind) {
+      return undefined;
+    }
+
+    const sanitized = UtilsProvider.sanitizeCID(rawValue);
+
+    if (slotKind === 'ipfs') {
+      const ipnsKey = detectIpnsFromIpfsValue(sanitized);
+
+      if (ipnsKey) {
+        return { value: ipnsKey, contentType: ContentType.IPNS };
+      }
+    }
+
+    const normalized = normalizeContentValue(sanitized, slotKind);
+
+    if (normalized.length === 0) {
+      return undefined;
+    }
+
+    return { value: normalized, contentType: contentTypeForKind(slotKind) };
   }
 
   /**
@@ -144,7 +211,7 @@ export class SnsService {
   private async tryRecordV2(
     name: string,
     record: SnsRecord,
-  ): Promise<string | undefined> {
+  ): Promise<IRecordReadResult | undefined> {
     let domainKey: PublicKey;
     let recordKey: PublicKey;
 
@@ -227,12 +294,10 @@ export class SnsService {
         return undefined;
       }
 
-      const cid = normalizeContentValue(
-        UtilsProvider.sanitizeCID(deserializeRecordV2Content(content, record)),
-        recordKind(record),
+      return this.classifyRecordContent(
+        deserializeRecordV2Content(content, record),
+        record,
       );
-
-      return cid.length > 0 ? cid : undefined;
     } catch (error) {
       if (isMissingAccountError(error)) {
         // Legitimate "no V2 record set" signal — fall through to V1.
@@ -259,7 +324,7 @@ export class SnsService {
   private async tryRecordV1(
     name: string,
     record: SnsRecord,
-  ): Promise<string | undefined> {
+  ): Promise<IRecordReadResult | undefined> {
     try {
       const content = await UtilsProvider.retryWithExponentialBackoff(() =>
         getRecord(this.solanaService.connection, name, record, true),
@@ -269,12 +334,7 @@ export class SnsService {
         return undefined;
       }
 
-      const cid = normalizeContentValue(
-        UtilsProvider.sanitizeCID(content),
-        recordKind(record),
-      );
-
-      return cid.length > 0 ? cid : undefined;
+      return this.classifyRecordContent(content, record);
     } catch (error) {
       if (isMissingAccountError(error)) {
         // Legitimate "no V1 record set" — fall through.

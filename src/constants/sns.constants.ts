@@ -51,6 +51,9 @@ export type RecordName = (typeof RecordName)[keyof typeof RecordName];
 export const ContentType = {
   IPFS: 'ipfs-ns',
   ARWEAVE: 'arweave-ns',
+  // Emitted when an IPFS record's value is `ipns://<key>` (SNS-client
+  // convention). The pointer pipeline then creates a mutable-pointer row.
+  IPNS: 'ipns-ns',
 } as const;
 // eslint-disable-next-line no-redeclare
 export type ContentType = (typeof ContentType)[keyof typeof ContentType];

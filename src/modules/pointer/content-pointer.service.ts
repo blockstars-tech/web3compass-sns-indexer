@@ -8,6 +8,7 @@ import {
   PointerState,
 } from './content-pointer.entity';
 import { ContentPointerRepository } from './content-pointer.repository';
+import { isPlausiblePointerValue } from './pointer-value.validator';
 
 /**
  * Maps an ENS contenthash codec string to our PointerKind enum.
@@ -151,6 +152,17 @@ export class ContentPointerService {
       // stale pointer row lingers (e.g. a domain re-pointed from ipns-ns
       // to ipfs-ns, or contentHash was cleared on-chain).
       await this.deleteByDnsId(args.dnsId);
+
+      return;
+    }
+
+    // Defense against a classifier bug producing a junk pointer value.
+    // Skip the upsert and leave any existing row intact so the mismatch
+    // is visible without poisoning the pointer pipeline.
+    if (!isPlausiblePointerValue(args.cid)) {
+      this.logger.warn(
+        `syncFromDns rejecting implausible pointer value for dns=${args.dnsId} kind=${kind} cid=${args.cid}`,
+      );
 
       return;
     }

@@ -246,7 +246,9 @@ export class SnsRegisterJob {
       isDirty = true;
     }
 
-    if (row.ownerAddress !== owner) {
+    // Only fill when missing — record-changes' unknown-domain branch may
+    // have written a fresher owner via `getOwner`. Same rule as setupTxHash above.
+    if (!row.ownerAddress) {
       row.ownerAddress = owner;
       row.address = owner;
       isDirty = true;

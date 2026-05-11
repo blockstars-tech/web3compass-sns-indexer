@@ -18,10 +18,8 @@ import { DnsMigrationRepository } from '../../dns/dns-migration.repository';
 import { DnsSettingsService } from '../../dns/dns-settings.service';
 import { ContentPointerService } from '../../pointer/content-pointer.service';
 import { ApiConfigService } from '../../shared/services/api-config.service';
-import {
-  type IResolvedContent,
-  SnsService,
-} from '../../shared/services/sns.service';
+import { SnsService } from '../../shared/services/sns.service';
+import { type IResolvedContent } from '../../shared/services/sns.types';
 import { SolanaService } from '../../shared/services/solana.service';
 import { collectSignaturesSinceSlot } from '../lib/signature-walker';
 import { extractV2RecordDomains } from '../parsers/sns-record-instruction';

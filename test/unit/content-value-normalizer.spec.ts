@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { normalizeContentValue } from '../../src/providers/content-value-normalizer';
+import {
+  detectIpnsFromIpfsValue,
+  normalizeContentValue,
+} from '../../src/providers/content-value-normalizer';
 
 describe('normalizeContentValue (ipfs)', () => {
   it('passes a bare CIDv0 (Qm...) through unchanged', () => {
@@ -177,5 +180,124 @@ describe('normalizeContentValue (arweave)', () => {
   it('preserves uppercase letters in Arweave tx ID (not CIDv1)', () => {
     const tx = 'HnLG_0dN_iBPM8oFKMtPmzopDBqaQ7lUXZeNJahLGiE';
     expect(normalizeContentValue(tx, 'arweave')).toBe(tx);
+  });
+});
+
+describe('normalizeContentValue (ipns)', () => {
+  it('passes a bare IPNS key through unchanged', () => {
+    const key = 'k51qzi5uqu5dik3yxxdflyra3gxbx9qqs7atsqncf32vqlgyj0kjvogribn0n0';
+    expect(normalizeContentValue(key, 'ipns')).toBe(key);
+  });
+
+  it('strips the ipns:// prefix', () => {
+    expect(normalizeContentValue('ipns://k51abc', 'ipns')).toBe('k51abc');
+  });
+
+  it('strips the ipns: prefix without slashes', () => {
+    expect(normalizeContentValue('ipns:k51abc', 'ipns')).toBe('k51abc');
+  });
+
+  it('extracts key from a path-style IPNS gateway URL', () => {
+    expect(
+      normalizeContentValue('https://ipfs.io/ipns/k51abc/sub/path', 'ipns'),
+    ).toBe('k51abc');
+  });
+
+  it('extracts key from a subdomain-style IPNS gateway URL', () => {
+    expect(
+      normalizeContentValue('https://k51abc.ipns.dweb.link/path', 'ipns'),
+    ).toBe('k51abc');
+  });
+
+  it('strips trailing slash on a bare key', () => {
+    expect(normalizeContentValue('k51abc/', 'ipns')).toBe('k51abc');
+  });
+
+  it('strips trailing query and fragment', () => {
+    expect(normalizeContentValue('ipns://k51abc?x=1', 'ipns')).toBe('k51abc');
+    expect(normalizeContentValue('ipns://k51abc#frag', 'ipns')).toBe('k51abc');
+  });
+
+  it('returns empty for null / undefined / empty input', () => {
+    expect(normalizeContentValue(null, 'ipns')).toBe('');
+    expect(normalizeContentValue(undefined, 'ipns')).toBe('');
+    expect(normalizeContentValue('', 'ipns')).toBe('');
+  });
+});
+
+describe('detectIpnsFromIpfsValue', () => {
+  it('strips ipns:// and returns the bare key', () => {
+    expect(
+      detectIpnsFromIpfsValue(
+        'ipns://k51qzi5uqu5dik3yxxdflyra3gxbx9qqs7atsqncf32vqlgyj0kjvogribn0n0',
+      ),
+    ).toBe('k51qzi5uqu5dik3yxxdflyra3gxbx9qqs7atsqncf32vqlgyj0kjvogribn0n0');
+  });
+
+  it('strips the ipns: prefix without slashes', () => {
+    expect(detectIpnsFromIpfsValue('ipns:k51abc')).toBe('k51abc');
+  });
+
+  it('extracts key from a path-style IPNS gateway URL', () => {
+    expect(
+      detectIpnsFromIpfsValue('https://ipfs.io/ipns/k51abc/sub/path'),
+    ).toBe('k51abc');
+  });
+
+  it('extracts key from a subdomain-style IPNS gateway URL', () => {
+    expect(
+      detectIpnsFromIpfsValue('https://k51abc.ipns.dweb.link/path'),
+    ).toBe('k51abc');
+  });
+
+  it('strips trailing slash on a bare ipns:// value', () => {
+    expect(detectIpnsFromIpfsValue('ipns://k51abc/')).toBe('k51abc');
+  });
+
+  it('strips trailing query / fragment on a bare ipns:// value', () => {
+    expect(detectIpnsFromIpfsValue('ipns://k51abc?foo=bar')).toBe('k51abc');
+    expect(detectIpnsFromIpfsValue('ipns://k51abc#frag')).toBe('k51abc');
+  });
+
+  it('trims whitespace before detection', () => {
+    expect(detectIpnsFromIpfsValue('  ipns://k51abc  ')).toBe('k51abc');
+  });
+
+  it('returns undefined for an ordinary IPFS CIDv0 (Qm...)', () => {
+    expect(
+      detectIpnsFromIpfsValue('QmdrgT7AsRS19dpvAC7nVHX3uLE4gpJTvsRHcm9CnyBVCM'),
+    ).toBeUndefined();
+  });
+
+  it('returns undefined for an ordinary IPFS CIDv1 (bafy...)', () => {
+    expect(
+      detectIpnsFromIpfsValue(
+        'bafybeibyhzh2avzzyutxdvvzb5mlk6nxfyvuh2ws2e5ehr6nyf7cgmu5de',
+      ),
+    ).toBeUndefined();
+  });
+
+  it('returns undefined for an ipfs:// value', () => {
+    expect(
+      detectIpnsFromIpfsValue('ipfs://bafybeibyhzh2avzzyutxdvvzb5mlk6nxfyv'),
+    ).toBeUndefined();
+  });
+
+  it('returns undefined for an IPFS gateway URL', () => {
+    expect(
+      detectIpnsFromIpfsValue('https://ipfs.io/ipfs/QmFoo'),
+    ).toBeUndefined();
+  });
+
+  it('returns undefined for null / undefined / empty input', () => {
+    expect(detectIpnsFromIpfsValue(null)).toBeUndefined();
+    expect(detectIpnsFromIpfsValue(undefined)).toBeUndefined();
+    expect(detectIpnsFromIpfsValue('')).toBeUndefined();
+    expect(detectIpnsFromIpfsValue('   ')).toBeUndefined();
+  });
+
+  it('returns undefined when the prefix is present but the body is empty', () => {
+    expect(detectIpnsFromIpfsValue('ipns://')).toBeUndefined();
+    expect(detectIpnsFromIpfsValue('ipns://#frag')).toBeUndefined();
   });
 });

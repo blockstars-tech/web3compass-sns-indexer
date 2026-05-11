@@ -10,11 +10,11 @@ import { DnsRepository } from '../../dns/dns.repository';
 import { DnsSettingsService } from '../../dns/dns-settings.service';
 import { ContentPointerService } from '../../pointer/content-pointer.service';
 import { ApiConfigService } from '../../shared/services/api-config.service';
+import { SnsService } from '../../shared/services/sns.service';
 import {
   type IResolvedContent,
   type ResolutionSource,
-  SnsService,
-} from '../../shared/services/sns.service';
+} from '../../shared/services/sns.types';
 import { applyResolution } from './sns-reconcile.state';
 
 const RECONCILE_BATCH_SIZE = 100;
@@ -24,6 +24,8 @@ type SourceKey = ResolutionSource | 'none';
 const SOURCE_KEYS: SourceKey[] = [
   'v2-ipfs',
   'v1-ipfs',
+  'v2-ipns',
+  'v1-ipns',
   'v2-arwv',
   'v1-arwv',
   'none',
@@ -31,10 +33,10 @@ const SOURCE_KEYS: SourceKey[] = [
 
 /**
  * Drains the first-time-resolution queue (`chain = solana AND cid IS NULL
- * AND is_fetch_failed IS NOT TRUE`) by running the V2-IPFS → V1-IPFS →
- * V2-ARWV → V1-ARWV resolution chain. Once a row has a cid it leaves the
- * queue; subsequent content changes are picked up inline by
- * `SnsRecordChangesJob`. Per-result write protocol lives in
+ * AND is_fetch_failed IS NOT TRUE`) by running the SNS resolution chain
+ * (V2-IPFS → V1-IPFS → V2-IPNS → V1-IPNS → V2-ARWV → V1-ARWV). Once a row
+ * has a cid it leaves the queue; subsequent content changes are picked up
+ * inline by `SnsRecordChangesJob`. Per-result write protocol lives in
  * `applyResolution` (see `sns-reconcile.state.ts`).
  */
 @Injectable()
@@ -96,6 +98,8 @@ export class SnsReconcileJob {
       const stats: Record<SourceKey, number> = {
         'v2-ipfs': 0,
         'v1-ipfs': 0,
+        'v2-ipns': 0,
+        'v1-ipns': 0,
         'v2-arwv': 0,
         'v1-arwv': 0,
         none: 0,

@@ -3,7 +3,7 @@ import {
   MAX_IPFS_FETCH_RETRY_ATTEMPTS,
   StatusCodes,
 } from '../../../constants/dns.constants';
-import { type IResolvedContent } from '../../shared/services/sns.service';
+import { type IResolvedContent } from '../../shared/services/sns.types';
 
 /**
  * The subset of `DnsEntity` the reconcile state machine reads or mutates.
