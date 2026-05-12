@@ -1,35 +1,30 @@
-name: CI
-
+name: Build & Push to ECR
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches: ['main']
+  workflow_dispatch:
 
 jobs:
-  build:
+  ecr:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
-          node-version-file: .nvmrc
-          cache: yarn
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Typecheck
-        run: yarn typecheck
-
-      - name: Lint
-        run: yarn lint
-
-      - name: Unit tests
-        # Live-RPC integration tests auto-skip when no SOLANA_RPC_* env
-        # is set, so a plain `yarn test` runs only the deterministic suite.
-        run: yarn test
-
-      - name: Build
-        run: yarn build
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      - run: |
+          aws ecr describe-repositories --repository-names "${{ secrets.IMAGE_NAME }}" >/dev/null 2>&1 || \
+            aws ecr create-repository --repository-name "${{ secrets.IMAGE_NAME }}"
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.ecr.outputs.registry }}/${{ secrets.IMAGE_NAME }}:latest
+            ${{ steps.ecr.outputs.registry }}/${{ secrets.IMAGE_NAME }}:${{ github.sha }}
