@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  typecheck:
+    uses: ./.github/workflows/10-typecheck.yml
+
+  lint:
+    needs: [typecheck]
+    uses: ./.github/workflows/20-lint.yml
+
+  test:
+    needs: [lint]
+    uses: ./.github/workflows/30-test.yml
+
+  build:
+    needs: [test]
+    uses: ./.github/workflows/40-build.yml
+
+  dependency-review:
+    # PR-only (compares PR dependencies vs base branch)
+    if: ${{ github.event_name == 'pull_request' }}
+    needs: [build]
+    uses: ./.github/workflows/50-dependency-review.yml
+
+  secret-scan:
+    needs: [build]
+    uses: ./.github/workflows/60-secret-scan.yml
+
+  docker-ecr:
+    # Only push images from main (or manual dispatch)
+    if: ${{ github.event_name != 'pull_request' }}
+    needs: [build, secret-scan]
+    uses: ./.github/workflows/90-docker-ecr.yml
+    secrets: inherit
+

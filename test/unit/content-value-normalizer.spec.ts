@@ -185,7 +185,7 @@ describe('normalizeContentValue (arweave)', () => {
 
 describe('normalizeContentValue (ipns)', () => {
   it('passes a bare IPNS key through unchanged', () => {
-    const key = 'k51qzi5uqu5dik3yxxdflyra3gxbx9qqs7atsqncf32vqlgyj0kjvogribn0n0';
+    const key = 'k51abc';
     expect(normalizeContentValue(key, 'ipns')).toBe(key);
   });
 

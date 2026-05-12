@@ -1,30 +1,37 @@
-name: Build & Push to ECR
+name: Docker Build & Push (ECR)
+
 on:
-  push:
-    branches: ['main']
-  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   ecr:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
     steps:
       - uses: actions/checkout@v4
+
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ secrets.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+
       - id: ecr
         uses: aws-actions/amazon-ecr-login@v2
-      - run: |
+
+      - name: Ensure ECR repository exists
+        run: |
           aws ecr describe-repositories --repository-names "${{ secrets.IMAGE_NAME }}" >/dev/null 2>&1 || \
             aws ecr create-repository --repository-name "${{ secrets.IMAGE_NAME }}"
-      - uses: docker/build-push-action@v6
+
+      - name: Build & push
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: |
             ${{ steps.ecr.outputs.registry }}/${{ secrets.IMAGE_NAME }}:latest
             ${{ steps.ecr.outputs.registry }}/${{ secrets.IMAGE_NAME }}:${{ github.sha }}
+
