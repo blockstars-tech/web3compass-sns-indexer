@@ -30,6 +30,9 @@ jobs:
     # PR-only (compares PR dependencies vs base branch)
     if: ${{ github.event_name == 'pull_request' }}
     needs: [build]
+    permissions:
+      contents: read
+      pull-requests: read
     uses: ./.github/workflows/50-dependency-review.yml
 
   secret-scan:
