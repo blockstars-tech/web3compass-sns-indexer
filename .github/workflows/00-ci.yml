@@ -43,6 +43,9 @@ jobs:
     # Only push images from main (or manual dispatch)
     if: ${{ github.event_name != 'pull_request' }}
     needs: [build, secret-scan]
+    permissions:
+      contents: read
+      id-token: write
     uses: ./.github/workflows/90-docker-ecr.yml
     secrets: inherit
 
