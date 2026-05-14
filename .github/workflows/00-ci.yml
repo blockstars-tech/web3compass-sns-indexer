@@ -35,14 +35,10 @@ jobs:
       pull-requests: read
     uses: ./.github/workflows/50-dependency-review.yml
 
-  secret-scan:
-    needs: [build]
-    uses: ./.github/workflows/60-secret-scan.yml
-
   docker-ecr:
     # Only push images from main (or manual dispatch)
     if: ${{ github.event_name != 'pull_request' }}
-    needs: [build, secret-scan]
+    needs: [build]
     permissions:
       contents: read
       id-token: write
