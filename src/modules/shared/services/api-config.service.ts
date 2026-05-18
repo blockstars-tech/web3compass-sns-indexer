@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { readFileSync } from 'fs';
 
 import { SnakeNamingStrategy } from '../../../strategies/snake-naming.strategy';
 
@@ -62,6 +63,10 @@ export class ApiConfigService {
    * Schema lives in `web3compassapi`. See ADR 0002.
    */
   get typeOrmConfig(): TypeOrmModuleOptions {
+    const caPath =
+      process.env.PG_CA_FILE || '/etc/ssl/certs/aws/global-bundle.pem';
+    const useSSL = this.getString('PG_SSL');
+
     return {
       type: 'postgres',
       host: this.getString('DB_HOST'),
@@ -69,7 +74,9 @@ export class ApiConfigService {
       username: this.getString('DB_USERNAME'),
       password: this.getString('DB_PASSWORD'),
       database: this.getString('DB_DATABASE'),
-      ssl: this.getBoolean('PG_SSL', false),
+      ssl: useSSL
+        ? { rejectUnauthorized: true, ca: readFileSync(caPath, 'utf8') }
+        : false,
       entities: [__dirname + '/../../**/*.entity{.ts,.js}'],
       migrations: [],
       migrationsRun: false,
