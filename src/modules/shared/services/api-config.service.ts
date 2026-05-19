@@ -64,7 +64,7 @@ export class ApiConfigService {
    */
   get typeOrmConfig(): TypeOrmModuleOptions {
     const caPath =
-      process.env.PG_CA_FILE || '/etc/ssl/certs/aws/global-bundle.pem';
+      this.getString('PG_CA_FILE') || '/etc/ssl/certs/aws/global-bundle.pem';
     const useSSL = this.getString('PG_SSL');
 
     return {
