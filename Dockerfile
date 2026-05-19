@@ -16,5 +16,10 @@ ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY package.json ./
+# Put cert where all libs can read it
+RUN mkdir -p /etc/ssl/certs/aws
+
+# ⬇️ Copy your repo PEM into the image
+COPY ./global-bundle.pem /etc/ssl/certs/aws/global-bundle.pem
 USER node
 CMD ["node", "dist/main.js"]
