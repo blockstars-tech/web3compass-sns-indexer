@@ -22,6 +22,10 @@ COPY package.json ./
 
 RUN mkdir -p /app/logs && chown -R node:node /app
 
+RUN mkdir -p /etc/ssl/certs/aws
+COPY ./global-bundle.pem /etc/ssl/certs/aws/global-bundle.pem
+
+
 USER node
 
 CMD ["node", "dist/main.js"]
