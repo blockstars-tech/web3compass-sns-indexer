@@ -1,3 +1,80 @@
+# Web3 Compass
+
+**A search engine built for the decentralized web.**
+
+Web3 Compass makes decentralized websites (dSites), blockchain domains, and
+content stored on IPFS, IPNS, Swarm, and TON searchable from one unified
+platform — content that traditional search engines cannot index.
+
+As the decentralized internet grows across independent blockchain ecosystems,
+discovering content remains a genuine challenge. Web3 Compass closes that gap
+by bringing Web3 content into a familiar search experience.
+
+**100+ Blockchain Domain Extensions Supported** • Search index continuously
+expanding
+
+## 🌐 About
+
+Traditional search engines were built for the centralized web. They cannot
+discover a website whose address is an ENS name, whose content lives on IPFS,
+and whose location changes every time the owner publishes an update.
+
+Web3 Compass was built to solve exactly that.
+
+It follows blockchain name registries to discover decentralized domains,
+resolves each name to its current content location, retrieves content through
+the appropriate decentralized network, and indexes it to make it searchable.
+
+## 💠 Blockchain Domain Support
+
+Web3 Compass currently supports 100+ blockchain domain extensions, including
+major decentralized naming ecosystems such as:
+
+| Supported |
+| --- |
+| ENS |
+| UNS |
+| SNS |
+| TON |
+| BNB |
+| TOMI |
+| ...and many more |
+
+Our search index continues to grow as new blockchain naming systems and
+decentralized ecosystems emerge.
+
+## 📦 Supported Content Networks
+
+| Network | Description |
+| --- | --- |
+| IPFS | Immutable content-addressed storage |
+| IPNS | Mutable IPFS pointers |
+| DNSLink | DNS-based content pointers |
+| Swarm | Ethereum's decentralized storage network |
+| TON Sites | ADNL-addressed websites served over RLDP |
+| TON Storage | Content-addressed BAGs |
+
+## 🌍 Resources
+
+| Platform | Link |
+| --- | --- |
+| 🌐 Website | https://www.web3compass.net/ |
+| 💻 GitHub | https://github.com/blockstars-tech |
+| 💼 LinkedIn | https://www.linkedin.com/company/web3compass/ |
+| ✖️ X (Twitter) | https://x.com/Web3compass_net |
+
+## 🔒 Privacy
+
+Web3 Compass requires no account, no sign-up, and no wallet connection to
+search. You can explore the decentralized web without identifying yourself.
+
+## About This Repository
+
+This repository contains the Web3 Compass SNS Indexer, one of the indexing
+components used within the Web3 Compass ecosystem.
+
+---
+
 # web3compass-sns-indexer
 
 A production-grade Solana Name Service (`.sol`) indexer that resolves
