@@ -60,6 +60,38 @@ The indexer code is provider-agnostic — `Connection` from
 `SOLANA_RPC_URL` env var. Swap providers by updating `.env` and
 restarting.
 
+### Optional secondary read endpoint
+
+Setting `SOLANA_SECONDARY_RPC_URL` (e.g. a Chainstack free-tier
+endpoint) splits traffic by JSON-RPC method inside the `Connection`
+fetch hook (`src/providers/rpc-router.ts`):
+
+| Method | Goes to |
+|---|---|
+| `getAccountInfo`, `getMultipleAccounts`, `getTransaction` | secondary first |
+| everything else (`getSignaturesForAddress`, `getProgramAccounts`, …) and batch requests | primary |
+
+A secondary answer is used only if it is a valid, non-error response.
+These cases go to the primary instead:
+
+- a `getTransaction` result of `null`;
+- an account read whose `context.slot` is older than the newest slot
+  already seen from the primary;
+- a request over the secondary RPS budget (`SOLANA_SECONDARY_RPC_MAX_RPS`,
+  default 4), which goes to the primary without waiting.
+
+Requests time out after 5 s. After 3 consecutive secondary errors the
+secondary is skipped for 60 s (circuit breaker).
+
+On startup the service logs `Solana RPC router on: …`, showing hosts
+only, never keys. Every 10 minutes, and on shutdown, it logs
+`Solana RPC router (since start): secondary_ok=… overflow=… bypass=…
+fallback_error=… fallback_null=… fallback_stale=…`. A high
+`fallback_error` count means the secondary is unhealthy.
+
+**Rollback:** unset `SOLANA_SECONDARY_RPC_URL` and restart. The service
+then uses the primary only, exactly as before.
+
 ## Cron cadences
 
 | Job | Cadence | Notes |

@@ -4,6 +4,9 @@
  * Skipped when no RPC credentials are present in the env. To run:
  *   SOLANA_RPC_PROVIDER=helius SOLANA_RPC_API_KEY=<key> yarn test
  *
+ * Optionally also set SOLANA_SECONDARY_RPC_URL=<url> to exercise the
+ * secondary-endpoint router; the suite then asserts it carried traffic.
+ *
  * The assertions are intentionally shape-only — we don't pin specific
  * content for `bonfida.sol` because on-chain state can change. We just
  * verify that the resolver runs without throwing and returns the
@@ -57,6 +60,18 @@ class StubApiConfig {
   get solanaConfig() {
     return { provider: "test", network: "mainnet", rpcUrl: rpcUrl as string };
   }
+
+  get solanaRpcMaxRps() {
+    return Number(process.env.SOLANA_RPC_MAX_RPS ?? 5);
+  }
+
+  get solanaSecondaryRpcUrl() {
+    return process.env.SOLANA_SECONDARY_RPC_URL || undefined;
+  }
+
+  get solanaSecondaryRpcMaxRps() {
+    return Number(process.env.SOLANA_SECONDARY_RPC_MAX_RPS ?? 4);
+  }
 }
 
 const stubLogger = {
@@ -71,9 +86,10 @@ const stubLogger = {
 describeIfRpc("SnsService (live RPC)", () => {
   let snsService: SnsService;
   let connection: Connection;
+  let solana: SolanaService;
 
   beforeAll(() => {
-    const solana = new SolanaService(
+    solana = new SolanaService(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       new StubApiConfig() as any,
     );
@@ -132,4 +148,19 @@ describeIfRpc("SnsService (live RPC)", () => {
 
     expect(name).toBeUndefined();
   }, 30_000);
+
+  it("secondary router carried traffic (only when SOLANA_SECONDARY_RPC_URL is set)", () => {
+    const stats = solana.getRpcRouterStats();
+
+    if (!process.env.SOLANA_SECONDARY_RPC_URL) {
+      expect(stats).toBeUndefined();
+
+      return;
+    }
+
+    // Visible in the test output as evidence of the split.
+    console.log("rpc-router stats:", stats);
+    expect(stats!.secondary_ok).toBeGreaterThan(0);
+    solana.onModuleDestroy();
+  });
 });

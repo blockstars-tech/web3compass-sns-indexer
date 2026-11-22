@@ -24,11 +24,14 @@ export class TokenBucket {
     /** Refill rate in tokens per second. Defaults to `capacity` for a flat RPS cap. */
     private readonly refillPerSec: number = capacity,
   ) {
-    if (capacity <= 0) {
+    // `!Number.isFinite` also rejects `undefined` / `NaN`, which would
+    // otherwise pass `<= 0` and leave `tokens = NaN` — `acquire()` would
+    // then never resolve.
+    if (!Number.isFinite(capacity) || capacity <= 0) {
       throw new Error(`TokenBucket capacity must be > 0 (got ${capacity})`);
     }
 
-    if (refillPerSec <= 0) {
+    if (!Number.isFinite(refillPerSec) || refillPerSec <= 0) {
       throw new Error(
         `TokenBucket refillPerSec must be > 0 (got ${refillPerSec})`,
       );
@@ -52,6 +55,24 @@ export class TokenBucket {
       this.waiting.push(resolve);
       this.scheduleNextDrain();
     });
+  }
+
+  /**
+   * Take one token if one is available right now; never waits or queues.
+   * Returns `false` when the bucket is empty, so the caller can route the
+   * request elsewhere instead of waiting.
+   */
+  tryAcquire(): boolean {
+    this.refill();
+
+    // Queued `acquire()` callers have priority over a non-blocking take.
+    if (this.waiting.length === 0 && this.tokens >= 1) {
+      this.tokens -= 1;
+
+      return true;
+    }
+
+    return false;
   }
 
   private refill(): void {
