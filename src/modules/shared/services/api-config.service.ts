@@ -191,6 +191,26 @@ export class ApiConfigService {
   }
 
   /**
+   * Optional secondary read endpoint (e.g. a free-tier provider). When set,
+   * `getAccountInfo` / `getMultipleAccounts` / `getTransaction` are tried
+   * there first; any error, empty or stale answer falls back to the
+   * primary endpoint. Unset (default) = primary only, as before. The URL
+   * may embed an API key — set it via env only, never commit it.
+   */
+  get solanaSecondaryRpcUrl(): string | undefined {
+    return this.getStringOptional('SOLANA_SECONDARY_RPC_URL');
+  }
+
+  /**
+   * Requests-per-second budget for the secondary endpoint. When it is used
+   * up, requests go to the primary instead of waiting. Default 4 stays
+   * under a 5 RPS free-tier cap.
+   */
+  get solanaSecondaryRpcMaxRps(): number {
+    return this.getNumber('SOLANA_SECONDARY_RPC_MAX_RPS', 4);
+  }
+
+  /**
    * How many partitions (owner-first-byte buckets, 0–255) the backfill
    * job processes per cron tick. The cursor in `dns_migrations` row
    * `SNS_BACKFILL` advances by this many partitions per successful tick.

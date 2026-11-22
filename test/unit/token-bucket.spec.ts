@@ -45,4 +45,18 @@ describe('TokenBucket', () => {
     expect(() => new TokenBucket(5, 0)).toThrow();
     expect(() => new TokenBucket(5, -1)).toThrow();
   });
+
+  it('rejects non-finite capacity and refill rate instead of hanging', () => {
+    expect(() => new TokenBucket(undefined as unknown as number)).toThrow();
+    expect(() => new TokenBucket(Number.NaN)).toThrow();
+    expect(() => new TokenBucket(5, Number.NaN)).toThrow();
+  });
+
+  it('tryAcquire takes available tokens and returns false when empty, without waiting', () => {
+    const bucket = new TokenBucket(2, 1);
+
+    expect(bucket.tryAcquire()).toBe(true);
+    expect(bucket.tryAcquire()).toBe(true);
+    expect(bucket.tryAcquire()).toBe(false);
+  });
 });
